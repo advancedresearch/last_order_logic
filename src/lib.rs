@@ -9,17 +9,25 @@
 //! ### Motivation
 //!
 //! In [First Order Logic](https://en.wikipedia.org/wiki/First-order_logic),
-//! the truth value of quantified expressions depend on evaluation.
-//! This means that an automated theorem prover must annotate expressions with their truth value
+//! the truth values of quantified expressions depend on evaluation.
+//! This means that an automated theorem prover must annotate expressions with their truth values
 //! in order to operate efficiently under modifications to the source.
-//! The user of the language has no direct access to this truth value.
+//! The user of the language has no direct access to this information.
+//!
+//! Last Order Logic bridges the gap between usability and automated theorem proving.
+//!
+//! - Increased readability and improved communication
+//! - Efficient reuse of truth values
+//! - Extensible to higher dimensional truth values
+//!
+//! For example:
 //!
 //! `∀ x { ... }` - It is not easy to see whether this is `true` or `false`.
 //!
 //! With other words, First Order Logic is not computationally progressive.
 //!
 //! Last Order Logic fixes this problem by having quantified expressions evaluate to themselves,
-//! while the truth value is encoded in their type.
+//! while the truth value is encoded in the type.
 //!
 //! `∀ x { ... } : un(1)` - It is easy to see this is `true`.
 //!
