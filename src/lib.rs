@@ -1,10 +1,52 @@
+#![deny(missing_docs)]
+
+//! # Last Order Logic
+//!
+//! An experimental logical language.
+//!
+//! Based on paper [Last Order Logic](https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-order-logic.pdf).
+//!
+//! ### Motivation
+//!
+//! In [First Order Logic](https://en.wikipedia.org/wiki/First-order_logic),
+//! the truth value of quantified expressions depend on evaluation.
+//! This means that an automated theorem prover must annotate expressions with their truth value
+//! in order to operate efficiently under modifications to the source.
+//! The user of the language has no direct access to this truth value.
+//!
+//! `∀ x { ... }` - It is not easy to see whether this is `true` or `false`.
+//!
+//! With other words, First Order Logic is not computationally progressive.
+//!
+//! Last Order Logic fixes this problem by having quantified expressions evaluate to themselves,
+//! while the truth value is encoded in their type.
+//!
+//! `∀ x { ... } : un(1)` - It is easy to see this is `true`.
+//!
+//! Types are used to communicate intentions of programs.
+//! Last Order Logic uses this feature to increase readability.
+//!
+//! The `un(..)` syntax stands for "uniform" which is `un(1)` for `∀` and `un(0)` for `∃`.
+//! Correspondingly, `nu(..)` stands for "non-uniform" which is `nu(1)` for `∃` and `nu(0)`
+//! for `∀`.
+//!
+//! Another reason is to express truth over paths, e.g. `un(0 ~= 1)`.
+//! These are higher dimensional truth values, not expressible in First Order Logic.
+//!
+//! The distinction between uniform and non-uniform sense of truth comes from the theory of
+//! [Avatar Extensions](https://advancedresearch.github.io/avatar-extensions/summary.html).
+//! Only non-uniform truth has a meaningful example that shows its truth value.
+
 use std::sync::Arc;
 use Expr::*;
 use std::fmt;
 
+/// Alternative for `true/1`.
 pub const T: Expr = _1;
+/// Alternative for `false/0`.
 pub const F: Expr = _0;
 
+/// Stores an expression.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
     /// Unit interval type.
@@ -139,6 +181,7 @@ impl fmt::Display for Expr {
 }
 
 impl Expr {
+    /// Returns `true` if expression needs parentheses, `false` otherwise.
     pub fn needs_parens(&self) -> bool {
         match self {
             _1 | _0 | I | Var(_) | Un(_) | Nu(_) |
@@ -147,6 +190,7 @@ impl Expr {
         }
     }
 
+    /// Returns `false` if the expression is a falsish expression, `false` otherwise.
     pub fn is_false(&self) -> bool {
         match self {
             _0 => true,
@@ -158,6 +202,7 @@ impl Expr {
         }
     }
 
+    /// Returns `true` if the expression is truish expression, `false` otherwise.
     pub fn is_true(&self) -> bool {
         match self {
             _0 => false,
@@ -168,6 +213,7 @@ impl Expr {
         }
     }
 
+    /// Gets the members of some type.
     pub fn members(&self) -> Vec<Expr> {
         match self {
             I => vec![_0, _1],
@@ -186,6 +232,7 @@ impl Expr {
         }
     }
 
+    /// Gets the type of an expression.
     pub fn ty(&self) -> Option<Expr> {
         match self {
             _0 | _1 => Some(I),
@@ -270,6 +317,7 @@ impl Expr {
         }
     }
 
+    /// Substitutes some argument with a value.
     pub fn substitute(&self, arg: &Expr, v: &Expr) -> (Expr, usize) {
         if self == arg {(v.clone(), 1)}
         else {
@@ -370,6 +418,7 @@ impl Expr {
         }
     }
 
+    /// Apply value to some lambda expression.
     pub fn app(&self, v: &Expr) -> Option<Expr> {
         match self {
             Lam(arg, body) => {
@@ -385,6 +434,7 @@ impl Expr {
         }
     }
 
+    /// Evaluates an expression.
     pub fn eval(&self) -> Expr {
         match self {
             _0 | _1 | I | Var(_) => self.clone(),
@@ -512,78 +562,97 @@ impl From<&str> for Expr {
     fn from(v: &str) -> Expr {Var(Arc::new(v.into()))}
 }
 
+/// `f(a)` - Lambda application.
 pub fn app<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     App(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `lift(a)` - Lifts value into type.
 pub fn lift<T: Into<Expr>>(a: T) -> Expr {
     Lift(Box::new(a.into()))
 }
 
+/// `a ~= b` - Path.
 pub fn pa<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Pa(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `a : b` - Type judgement.
 pub fn ty<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Ty(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `p ~ i` - Path index.
 pub fn ind<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Ind(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `\(a) = ...` - Lambda with one argument.
 pub fn lam<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Lam(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `\(a, b) = ...` - Lambda with two arguments.
 pub fn lam2<T0: Into<Expr>, T1: Into<Expr>, U: Into<Expr>>(a0: T0, a1: T1, b: U) -> Expr {
     lam(a0, lam(a1, b))
 }
 
+/// `∀ i { ... }` - For-all.
 pub fn all<T: Into<Expr>, U: Into<Expr>>(arg: T, v: U) -> Expr {
     All(Box::new(lam(arg, v)))
 }
 
+/// `∀ i, j { ... }` - Two nested for-all loops.
 pub fn all2<T0: Into<Expr>, T1: Into<Expr>, U: Into<Expr>>(a0: T0, a1: T1, b: U) -> Expr {
     all(a0, all(a1, b))
 }
 
+/// `∃ i { ... }` - There-exists.
 pub fn any<T: Into<Expr>, U: Into<Expr>>(arg: T, v: U) -> Expr {
     Any(Box::new(lam(arg, v)))
 }
 
+/// `nu(a)` - Non-uniform truth.
 pub fn nu<T: Into<Expr>>(a: T) -> Expr {
     Nu(Box::new(a.into()))
 }
 
+/// `un(a)` - Uniform truth.
 pub fn un<T: Into<Expr>>(a: T) -> Expr {
     Un(Box::new(a.into()))
 }
 
+/// `¬a` - Logical NOT.
 pub fn not<T: Into<Expr>>(a: T) -> Expr {
     Not(Box::new(a.into()))
 }
 
+/// `a ⋀ b` - Logical AND.
 pub fn and<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     And(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `a ⋁ b` - Logical OR.
 pub fn or<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Or(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `a => b` - Logical IMPLY.
 pub fn imply<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Imply(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `a == b` - Logical EQ.
 pub fn eq<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Eq(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `a ⊻ b` - Logical XOR.
 pub fn xor<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Xor(Box::new(a.into()), Box::new(b.into()))
 }
 
+/// `(a, b)` - A tuple of two elements.
 pub fn tup2<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Tup(vec![a.into(), b.into()])
 }
