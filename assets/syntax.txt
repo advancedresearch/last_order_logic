@@ -1,5 +1,6 @@
 _seps:"(){}~=:,"
 
+9 all = [{"∀" "all"} .w! expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
 7 app = [lexpr:"left" "(" .w? expr:"right" .w? ")"]
 6 lam = ["\\(" expr:"left" ")" .w? "=" .w? expr:"right"]
@@ -18,6 +19,7 @@ _seps:"(){}~=:,"
   ["un(" .w? expr:"un" .w? ")"]
   ["nu(" .w? expr:"nu" .w? ")"]
   ["lift(" .w? expr:"lift" .w? ")"]
+  all:"all"
   ty:"ty"
   pa:"pa"
   ind:"ind"

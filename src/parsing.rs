@@ -108,6 +108,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("app", convert, ignored) {
             convert.update(range);
             res = Some(app(left, right));
+        } else if let Ok((range, left, right)) = parse_left_right("all", convert, ignored) {
+            convert.update(range);
+            res = Some(all(left, right));
         } else if let Ok((range, v)) = parse_expr("un", convert, ignored) {
             convert.update(range);
             res = Some(un(v));
@@ -172,5 +175,6 @@ mod tests {
         assert_eq!(parse_str(r#"\(x : I) = x"#), Ok(lam(ty("x", I), "x")));
         assert_eq!(parse_str("f(x)"), Ok(app("f", "x")));
         assert_eq!(parse_str("(x, y, z)"), Ok(Tup(vec!["x".into(), "y".into(), "z".into()])));
+        assert_eq!(parse_str("all i : I { x }"), Ok(all(ty("i", I), "x")));
     }
 }
