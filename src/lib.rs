@@ -245,7 +245,7 @@ impl Expr {
     /// Gets the type of an expression.
     pub fn ty(&self) -> Option<Expr> {
         match self {
-            _0 | _1 => Some(I),
+            _0 | _1 | Ty(_, _) => Some(I),
             Var(_) => None,
             Ind(p, i) => {
                 if let Pa(a, b) = &**p {
@@ -766,6 +766,12 @@ mod tests {
 
         let a = all2(ty("i", I), ty("j", I), ind(pa(T, T), "i"));
         assert_eq!(a.ty(), None);
+    }
+
+    #[test]
+    fn test_ty_ty() {
+        let e = ty(_0, I);
+        assert_eq!(e.ty(), Some(I));
     }
 
     #[test]
