@@ -68,6 +68,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("pa", convert, ignored) {
             convert.update(range);
             res = Some(pa(left, right));
+        } else if let Ok((range, left, right)) = parse_left_right("ind", convert, ignored) {
+            convert.update(range);
+            res = Some(ind(left, right));
         } else {
             let range = convert.ignore();
             convert.update(range);
@@ -112,5 +115,6 @@ mod tests {
         assert_eq!(parse_str("1 : I"), Ok(ty(_1, I)));
         assert_eq!(parse_str("0 ~= 1"), Ok(pa(_0, _1)));
         assert_eq!(parse_str("(0 ~= 1)"), Ok(pa(_0, _1)));
+        assert_eq!(parse_str("(0 ~= 1) ~ 0"), Ok(ind(pa(_0, _1), _0)));
     }
 }
