@@ -1,5 +1,9 @@
-_seps:"(){}~=:,&⋀"
+_seps:"(){}~=:,&⋀|⋁"
 
+12 or = {
+  ["or(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
+  [lexpr:"left" .w? {"|" "⋁"} .w? lexpr:"right"]
+}
 11 and = {
   ["and(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
   [lexpr:"left" .w? {"&" "⋀"} .w? lexpr:"right"]
@@ -34,6 +38,7 @@ _seps:"(){}~=:,&⋀"
   lam:"lam"
   app:"app"
   and:"and"
+  or:"or"
   lexpr
 }
 0 doc = [.w? expr:"expr" .w?]

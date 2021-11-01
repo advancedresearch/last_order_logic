@@ -117,6 +117,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("and", convert, ignored) {
             convert.update(range);
             res = Some(and(left, right));
+        } else if let Ok((range, left, right)) = parse_left_right("or", convert, ignored) {
+            convert.update(range);
+            res = Some(or(left, right));
         } else if let Ok((range, v)) = parse_expr("un", convert, ignored) {
             convert.update(range);
             res = Some(un(v));
@@ -191,5 +194,8 @@ mod tests {
         assert_eq!(parse_str("0 & 1"), Ok(and(_0, _1)));
         assert_eq!(parse_str("0 ⋀ 1"), Ok(and(_0, _1)));
         assert_eq!(parse_str("and(0, 1)"), Ok(and(_0, _1)));
+        assert_eq!(parse_str("0 | 1"), Ok(or(_0, _1)));
+        assert_eq!(parse_str("0 ⋁ 1"), Ok(or(_0, _1)));
+        assert_eq!(parse_str("or(0, 1)"), Ok(or(_0, _1)));
     }
 }
