@@ -4,6 +4,34 @@ use crate::*;
 
 use piston_meta::{Convert, Range};
 
+/// Parses a tuple.
+pub fn parse_tup(
+    node: &str,
+    mut convert: Convert,
+    ignored: &mut Vec<Range>,
+) -> Result<(Range, Expr), ()> {
+    let start = convert;
+    let start_range = convert.start_node(node)?;
+    convert.update(start_range);
+
+    let mut res: Vec<Expr> = vec![];
+    loop {
+        if let Ok(range) = convert.end_node(node) {
+            convert.update(range);
+            break;
+        } else if let Ok((range, v)) = parse_expr("item", convert, ignored) {
+            convert.update(range);
+            res.push(v);
+        } else {
+            let range = convert.ignore();
+            convert.update(range);
+            ignored.push(range);
+        }
+    }
+
+    Ok((convert.subtract(start), Tup(res)))
+}
+
 /// Parses a left/right expression.
 pub fn parse_left_right(
     node: &str,
@@ -89,6 +117,9 @@ pub fn parse_expr(
         } else if let Ok((range, v)) = parse_expr("lift", convert, ignored) {
             convert.update(range);
             res = Some(lift(v));
+        } else if let Ok((range, v)) = parse_tup("tup", convert, ignored) {
+            convert.update(range);
+            res = Some(v);
         } else {
             let range = convert.ignore();
             convert.update(range);
@@ -140,5 +171,6 @@ mod tests {
         assert_eq!(parse_str("lift(0)"), Ok(lift(_0)));
         assert_eq!(parse_str(r#"\(x : I) = x"#), Ok(lam(ty("x", I), "x")));
         assert_eq!(parse_str("f(x)"), Ok(app("f", "x")));
+        assert_eq!(parse_str("(x, y, z)"), Ok(Tup(vec!["x".into(), "y".into(), "z".into()])));
     }
 }

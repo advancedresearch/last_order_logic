@@ -1,5 +1,6 @@
 _seps:"(){}~=:,"
 
+8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
 7 app = [lexpr:"left" "(" .w? expr:"right" .w? ")"]
 6 lam = ["\\(" expr:"left" ")" .w? "=" .w? expr:"right"]
 5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
@@ -7,6 +8,7 @@ _seps:"(){}~=:,"
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
 2 lexpr = {
   ["(" .w? expr .w? ")"]
+  tup:"tup"
   "I":"I"
   "0":"0"
   "1":"1"
