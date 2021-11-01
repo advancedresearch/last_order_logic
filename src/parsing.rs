@@ -123,6 +123,9 @@ pub fn parse_expr(
         } else if let Ok((range, v)) = parse_expr("lift", convert, ignored) {
             convert.update(range);
             res = Some(lift(v));
+        } else if let Ok((range, v)) = parse_expr("not", convert, ignored) {
+            convert.update(range);
+            res = Some(not(v));
         } else if let Ok((range, v)) = parse_tup("tup", convert, ignored) {
             convert.update(range);
             res = Some(v);
@@ -180,5 +183,7 @@ mod tests {
         assert_eq!(parse_str("(x, y, z)"), Ok(Tup(vec!["x".into(), "y".into(), "z".into()])));
         assert_eq!(parse_str("all i : I { x }"), Ok(all(ty("i", I), "x")));
         assert_eq!(parse_str("any i : I { x }"), Ok(any(ty("i", I), "x")));
+        assert_eq!(parse_str("not(0)"), Ok(not(_0)));
+        assert_eq!(parse_str("!0"), Ok(not(_0)));
     }
 }

@@ -20,6 +20,8 @@ _seps:"(){}~=:,"
   ["un(" .w? expr:"un" .w? ")"]
   ["nu(" .w? expr:"nu" .w? ")"]
   ["lift(" .w? expr:"lift" .w? ")"]
+  ["not(" .w? expr:"not" .w? ")"]
+  [{"!" "¬"} expr:"not"]
   all:"all"
   any:"any"
   ty:"ty"
