@@ -572,6 +572,10 @@ impl From<&str> for Expr {
     fn from(v: &str) -> Expr {Var(Arc::new(v.into()))}
 }
 
+impl From<Arc<String>> for Expr {
+    fn from(v: Arc<String>) -> Expr {Var(v)}
+}
+
 /// `f(a)` - Lambda application.
 pub fn app<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     App(Box::new(a.into()), Box::new(b.into()))

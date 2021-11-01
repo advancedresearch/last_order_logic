@@ -1,3 +1,5 @@
+_seps:"(){}~=:,"
+
 5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
@@ -6,6 +8,7 @@
   "I":"I"
   "0":"0"
   "1":"1"
+  .._seps!:"var"
 }
 1 expr = {
   ty:"ty"
