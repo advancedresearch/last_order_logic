@@ -1,5 +1,6 @@
 _seps:"(){}~=:,"
 
+6 lam = ["\\(" expr:"left" ")" .w? "=" .w? expr:"right"]
 5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
@@ -17,6 +18,7 @@ _seps:"(){}~=:,"
   ty:"ty"
   pa:"pa"
   ind:"ind"
+  lam:"lam"
   lexpr
 }
 0 doc = [.w? expr:"expr" .w?]
