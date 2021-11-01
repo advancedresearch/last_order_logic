@@ -126,6 +126,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("eq", convert, ignored) {
             convert.update(range);
             res = Some(eq(left, right));
+        } else if let Ok((range, left, right)) = parse_left_right("xor", convert, ignored) {
+            convert.update(range);
+            res = Some(xor(left, right));
         } else if let Ok((range, v)) = parse_expr("un", convert, ignored) {
             convert.update(range);
             res = Some(un(v));
@@ -207,5 +210,8 @@ mod tests {
         assert_eq!(parse_str("imply(0, 1)"), Ok(imply(_0, _1)));
         assert_eq!(parse_str("1 == 1"), Ok(eq(_1, _1)));
         assert_eq!(parse_str("eq(1, 1)"), Ok(eq(_1, _1)));
+        assert_eq!(parse_str("1 != 0"), Ok(xor(_1, _0)));
+        assert_eq!(parse_str("1 ⊻ 0"), Ok(xor(_1, _0)));
+        assert_eq!(parse_str("xor(1, 0)"), Ok(xor(_1, _0)));
     }
 }
