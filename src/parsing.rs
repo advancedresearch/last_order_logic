@@ -77,6 +77,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("lam", convert, ignored) {
             convert.update(range);
             res = Some(lam(left, right));
+        } else if let Ok((range, left, right)) = parse_left_right("app", convert, ignored) {
+            convert.update(range);
+            res = Some(app(left, right));
         } else if let Ok((range, v)) = parse_expr("un", convert, ignored) {
             convert.update(range);
             res = Some(un(v));
@@ -136,5 +139,6 @@ mod tests {
         assert_eq!(parse_str("nu(0)"), Ok(nu(_0)));
         assert_eq!(parse_str("lift(0)"), Ok(lift(_0)));
         assert_eq!(parse_str(r#"\(x : I) = x"#), Ok(lam(ty("x", I), "x")));
+        assert_eq!(parse_str("f(x)"), Ok(app("f", "x")));
     }
 }
