@@ -2,6 +2,7 @@ use last_order_logic::*;
 
 pub fn main() {
     println!("=== Last Order Logic 0.1 ===");
+    println!("Type `help` for more information.");
 
     let mut last_expr: Option<Expr> = None;
     loop {
@@ -37,6 +38,9 @@ pub fn main() {
                 } else {
                     println!("LOL: Type in an expression first");
                 }
+            }
+            "help" => {
+                println!("{}", include_str!("../assets/help.txt"));
             }
             x => {
                 match parsing::parse_str(&x) {
