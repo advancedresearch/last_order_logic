@@ -54,6 +54,8 @@ pub const T: Expr = _1;
 /// Alternative for `false/0`.
 pub const F: Expr = _0;
 
+pub mod parsing;
+
 /// Stores an expression.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
