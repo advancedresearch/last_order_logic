@@ -4,6 +4,40 @@ use crate::*;
 
 use piston_meta::{Convert, Range};
 
+/// Parses a type expression.
+pub fn parse_ty(
+    node: &str,
+    mut convert: Convert,
+    ignored: &mut Vec<Range>,
+) -> Result<(Range, Expr), ()> {
+    let start = convert;
+    let start_range = convert.start_node(node)?;
+    convert.update(start_range);
+
+    let mut left: Option<Expr> = None;
+    let mut right: Option<Expr> = None;
+    loop {
+        if let Ok(range) = convert.end_node(node) {
+            convert.update(range);
+            break;
+        } else if let Ok((range, v)) = parse_expr("left", convert, ignored) {
+            convert.update(range);
+            left = Some(v);
+        } else if let Ok((range, v)) = parse_expr("right", convert, ignored) {
+            convert.update(range);
+            right = Some(v);
+        } else {
+            let range = convert.ignore();
+            convert.update(range);
+            ignored.push(range);
+        }
+    }
+
+    let left = left.ok_or(())?;
+    let right = right.ok_or(())?;
+    Ok((convert.subtract(start), ty(left, right)))
+}
+
 /// Parses an expression.
 pub fn parse_expr(
     node: &str,
@@ -28,6 +62,9 @@ pub fn parse_expr(
         } else if let Ok((range, _)) = convert.meta_bool("I") {
             convert.update(range);
             res = Some(I);
+        } else if let Ok((range, v)) = parse_ty("ty", convert, ignored) {
+            convert.update(range);
+            res = Some(v);
         } else {
             let range = convert.ignore();
             convert.update(range);
@@ -68,5 +105,7 @@ mod tests {
         assert_eq!(parse_str("0"), Ok(_0));
         assert_eq!(parse_str("1"), Ok(_1));
         assert_eq!(parse_str("I"), Ok(I));
+        assert_eq!(parse_str("0 : I"), Ok(ty(_0, I)));
+        assert_eq!(parse_str("1 : I"), Ok(ty(_1, I)));
     }
 }
