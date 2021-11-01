@@ -13,6 +13,7 @@ _seps:"(){}~=:,"
 1 expr = {
   ["un(" .w? expr:"un" .w? ")"]
   ["nu(" .w? expr:"nu" .w? ")"]
+  ["lift(" .w? expr:"lift" .w? ")"]
   ty:"ty"
   pa:"pa"
   ind:"ind"

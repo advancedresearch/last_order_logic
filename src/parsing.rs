@@ -80,6 +80,9 @@ pub fn parse_expr(
         } else if let Ok((range, v)) = parse_expr("nu", convert, ignored) {
             convert.update(range);
             res = Some(nu(v));
+        } else if let Ok((range, v)) = parse_expr("lift", convert, ignored) {
+            convert.update(range);
+            res = Some(lift(v));
         } else {
             let range = convert.ignore();
             convert.update(range);
@@ -128,5 +131,6 @@ mod tests {
         assert_eq!(parse_str("x"), Ok("x".into()));
         assert_eq!(parse_str("un(1)"), Ok(un(_1)));
         assert_eq!(parse_str("nu(0)"), Ok(nu(_0)));
+        assert_eq!(parse_str("lift(0)"), Ok(lift(_0)));
     }
 }
