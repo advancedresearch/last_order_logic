@@ -1,6 +1,7 @@
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
 2 lexpr = {
+  ["(" .w? expr .w? ")"]
   "I":"I"
   "0":"0"
   "1":"1"

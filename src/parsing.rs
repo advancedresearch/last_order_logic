@@ -111,5 +111,6 @@ mod tests {
         assert_eq!(parse_str("0 : I"), Ok(ty(_0, I)));
         assert_eq!(parse_str("1 : I"), Ok(ty(_1, I)));
         assert_eq!(parse_str("0 ~= 1"), Ok(pa(_0, _1)));
+        assert_eq!(parse_str("(0 ~= 1)"), Ok(pa(_0, _1)));
     }
 }
