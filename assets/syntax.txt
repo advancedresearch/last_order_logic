@@ -1,5 +1,9 @@
 _seps:"(){}~=:,&⋀|⋁"
 
+13 imply = {
+  ["imply(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
+  [lexpr:"left" .w? "=>" .w? lexpr:"right"]
+}
 12 or = {
   ["or(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
   [lexpr:"left" .w? {"|" "⋁"} .w? lexpr:"right"]
@@ -39,6 +43,7 @@ _seps:"(){}~=:,&⋀|⋁"
   app:"app"
   and:"and"
   or:"or"
+  imply:"imply"
   lexpr
 }
 0 doc = [.w? expr:"expr" .w?]
