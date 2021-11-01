@@ -16,3 +16,4 @@ documentation = "https://docs.rs/last_order_logic"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+piston_meta = "2.0.1"

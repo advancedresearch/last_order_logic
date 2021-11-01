@@ -54,6 +54,8 @@ pub const T: Expr = _1;
 /// Alternative for `false/0`.
 pub const F: Expr = _0;
 
+pub mod parsing;
+
 /// Stores an expression.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
@@ -568,6 +570,10 @@ impl Expr {
 
 impl From<&str> for Expr {
     fn from(v: &str) -> Expr {Var(Arc::new(v.into()))}
+}
+
+impl From<Arc<String>> for Expr {
+    fn from(v: Arc<String>) -> Expr {Var(v)}
 }
 
 /// `f(a)` - Lambda application.
