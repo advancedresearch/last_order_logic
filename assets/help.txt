@@ -1,0 +1,12 @@
+=== LOL Help ===
+Made by Sven Nilsen, 2021
+
+Last Order Logic (LOL) is an experimental logical language
+based on the paper "Last Order Logic":
+https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-order-logic.pdf
+
+Special commands:
+
+- bye             quits the program
+- eval            evaluates last expression
+- ty              type checks last expression
