@@ -1,6 +1,5 @@
 _seps:"(){}~=:,"
 
-6 un = ["un(" .w? expr .w? ")"]
 5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
@@ -12,7 +11,8 @@ _seps:"(){}~=:,"
   .._seps!:"var"
 }
 1 expr = {
-  un:"un"
+  ["un(" .w? expr:"un" .w? ")"]
+  ["nu(" .w? expr:"nu" .w? ")"]
   ty:"ty"
   pa:"pa"
   ind:"ind"
