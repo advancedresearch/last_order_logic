@@ -1,5 +1,9 @@
-_seps:"(){}~=:,"
+_seps:"(){}~=:,&⋀"
 
+11 and = {
+  ["and(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
+  [lexpr:"left" .w? {"&" "⋀"} .w? lexpr:"right"]
+}
 10 any = [{"∃" "any"} .w! expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 9 all = [{"∀" "all"} .w! expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
@@ -29,6 +33,7 @@ _seps:"(){}~=:,"
   ind:"ind"
   lam:"lam"
   app:"app"
+  and:"and"
   lexpr
 }
 0 doc = [.w? expr:"expr" .w?]
