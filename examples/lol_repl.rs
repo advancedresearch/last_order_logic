@@ -28,13 +28,17 @@ pub fn main() {
                 println!("o=o>------------------------------------\n");
             }
             "bye" => break,
+            "red" => {
+                if let Some(expr) = &last_expr {
+                    let expr = runtime::reduce(expr, &defs);
+                    println!("{}", expr);
+                } else {
+                    println!("LOL: Type in an expression first");
+                }
+            }
             "eval" => {
                 if let Some(expr) = &last_expr {
-                    let mut expr = expr.clone();
-                    for (name, def) in &defs {
-                        let (expr2, _) = expr.substitute(&Expr::Var(name.clone()), def);
-                        expr = expr2;
-                    }
+                    let expr = runtime::reduce(expr, &defs);
                     println!("{}", expr.eval());
                 } else {
                     println!("LOL: Type in an expression first");
@@ -42,11 +46,7 @@ pub fn main() {
             }
             "ty" => {
                 if let Some(expr) = &last_expr {
-                    let mut expr = expr.clone();
-                    for (name, def) in &defs {
-                        let (expr2, _) = expr.substitute(&Expr::Var(name.clone()), def);
-                        expr = expr2;
-                    }
+                    let expr = runtime::reduce(expr, &defs);
                     if let Some(ty) = expr.ty() {
                         println!("{}", ty);
                     } else {

@@ -55,6 +55,7 @@ pub const T: Expr = _1;
 pub const F: Expr = _0;
 
 pub mod parsing;
+pub mod runtime;
 
 /// Stores an expression.
 #[derive(Clone, Debug, PartialEq, Eq)]
