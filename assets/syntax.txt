@@ -1,5 +1,6 @@
 _seps:"(){}~=:,&⋀|⋁!"
 
+17 def = [.._seps!:"name" .w? ":=" .w? expr:"expr"]
 16 ty_expr = ty:"ty"
 15 xor = {
   ["xor(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
@@ -58,4 +59,4 @@ _seps:"(){}~=:,&⋀|⋁!"
   xor:"xor"
   lexpr
 }
-0 doc = [.w? expr:"expr" .w?]
+0 doc = [.w? {def:"def" expr:"expr"} .w?]
