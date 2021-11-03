@@ -443,7 +443,15 @@ impl Expr {
     pub fn app(&self, v: &Expr) -> Option<Expr> {
         match self {
             Lam(arg, body) => {
-                if let Ty(a, _) = &**arg {
+                if let Ty(a, arg_ty) = &**arg {
+                    if let Pa(v0, v1) = v {
+                        if let Some(v_ty) = v.ty() {
+                            if &v_ty != &**arg_ty {
+                                return Some(pa(app(self.clone(), (**v0).clone()),
+                                               app(self.clone(), (**v1).clone())).eval());
+                            }
+                        }
+                    };
                     let (body2, n) = body.substitute(a, v);
                     if n == 0 {None}
                     else {Some(body2.eval())}
