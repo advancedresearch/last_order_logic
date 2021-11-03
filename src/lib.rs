@@ -204,24 +204,13 @@ impl Expr {
     pub fn is_false(&self) -> bool {
         match self {
             _0 => true,
-            _1 => false,
-            I => false,
-            Var(_) => false,
             Un(a) | Nu(a) => a.is_false(),
-            _ => unimplemented!("{}", self),
+            _ => false,
         }
     }
 
     /// Returns `true` if the expression is truish expression, `false` otherwise.
-    pub fn is_true(&self) -> bool {
-        match self {
-            _0 => false,
-            _1 => true,
-            Var(_) => true,
-            Un(a) | Nu(a) => a.is_true(),
-            _ => unimplemented!("{:?}", self),
-        }
-    }
+    pub fn is_true(&self) -> bool {!self.is_false()}
 
     /// Gets the members of some type.
     pub fn members(&self) -> Vec<Expr> {
