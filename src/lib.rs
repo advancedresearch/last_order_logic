@@ -337,6 +337,11 @@ impl Expr {
                 let b_ty = b.ty()?;
                 Some(eq(a_ty, b_ty).eval())
             }
+            Xor(a, b) => {
+                let a_ty = a.ty()?;
+                let b_ty = b.ty()?;
+                Some(xor(a_ty, b_ty).eval())
+            }
             _ => unimplemented!("{}", self),
         }
     }
@@ -570,6 +575,7 @@ impl Expr {
                 match (&**a, &**b) {
                     (_0, _0) | (_1, _1) => _0,
                     (_1, _0) | (_0, _1) => _1,
+                    (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
                         xor((**a0).clone(), (**b0).clone()).eval(),
                         xor((**a1).clone(), (**b1).clone()).eval(),
