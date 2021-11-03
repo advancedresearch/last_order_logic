@@ -20,6 +20,11 @@ pub fn main() {
         };
 
         match input.trim() {
+            "" => {
+                // Print separator for readability.
+                print!("\n------------------------------------<o=o");
+                println!("o=o>------------------------------------\n");
+            }
             "bye" => break,
             "eval" => {
                 if let Some(expr) = &last_expr {
