@@ -201,7 +201,7 @@ impl Expr {
     pub fn needs_parens(&self) -> bool {
         match self {
             _1 | _0 | I | Var(_) | Un(_) | Nu(_) |
-            All(_) | Any(_) | Tup(_) | Not(_) | Lift(_) => false,
+            All(_) | Any(_) | Tup(_) | Not(_) | Lift(_) | App(_, _) => false,
             _ => true,
         }
     }
