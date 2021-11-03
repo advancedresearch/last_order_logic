@@ -188,7 +188,6 @@ impl fmt::Display for Expr {
                 write!(w, " ⊻ ")?;
                 if b.needs_parens() {write!(w, "({})", b)?} else {write!(w, "{}", b)?};
             }
-            // _ => unimplemented!("{:?}", self),
         }
         Ok(())
     }
@@ -467,7 +466,6 @@ impl Expr {
                     let (b2, m) = b.substitute(arg, v);
                     (xor(a2, b2), n + m)
                 }
-                // _ => unimplemented!("{}", self)
             }
         }
     }
