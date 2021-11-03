@@ -239,6 +239,7 @@ impl Expr {
     pub fn ty(&self) -> Option<Expr> {
         match self {
             _0 | _1 | Ty(_, _) => Some(I),
+            I => None,
             Var(_) => None,
             Ind(p, i) => {
                 if let Pa(a, b) = &**p {
@@ -821,6 +822,8 @@ mod tests {
     fn test_ty_ty() {
         let e = ty(_0, I);
         assert_eq!(e.ty(), Some(I));
+
+        assert_eq!(I.ty(), None);
     }
 
     #[test]
