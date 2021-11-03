@@ -33,6 +33,7 @@ _seps:"(){}~=:,&⋀|⋁!"
   ["un(" .w? expr:"un" .w? ")"]
   ["nu(" .w? expr:"nu" .w? ")"]
   ["lift(" .w? expr:"lift" .w? ")"]
+  ["type(" .w? expr:"type" .w? ")"]
   ["not(" .w? expr:"not" .w? ")"]
   [{"!" "¬"} lexpr:"not"]
   all:"all"

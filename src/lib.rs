@@ -69,6 +69,8 @@ pub enum Expr {
     Var(Arc<String>),
     /// Type judgement.
     Ty(Box<Expr>, Box<Expr>),
+    /// Type evaluation.
+    Type(Box<Expr>),
     /// Path.
     Pa(Box<Expr>, Box<Expr>),
     /// Lambda expression.
@@ -109,6 +111,7 @@ impl fmt::Display for Expr {
             _0 => write!(w, "0")?,
             _1 => write!(w, "1")?,
             I => write!(w, "I")?,
+            Type(a) => write!(w, "type({})", a)?,
             Un(a) => write!(w, "un({})", a)?,
             Nu(a) => write!(w, "nu({})", a)?,
             Var(name) => write!(w, "{}", name)?,
@@ -239,6 +242,7 @@ impl Expr {
         match self {
             _0 | _1 | Ty(_, _) => Some(I),
             I | Var(_) | Lam(_, _) => None,
+            Type(a) => a.eval().ty()?.ty(),
             Ind(p, i) => {
                 if let Pa(a, b) = &**p {
                     match &**i {
@@ -337,6 +341,10 @@ impl Expr {
         else {
             match self {
                 _0 | _1 | I | Var(_) => (self.clone(), 0),
+                Type(a) => {
+                    let (a2, n) = a.substitute(arg, v);
+                    (typ(a2), n)
+                }
                 Un(a) => {
                     let (a2, n) = a.substitute(arg, v);
                     (un(a2), n)
@@ -451,6 +459,7 @@ impl Expr {
     pub fn eval(&self) -> Expr {
         match self {
             _0 | _1 | I | Var(_) => self.clone(),
+            Type(a) => if let Some(ty) = a.ty() {ty} else {self.clone()},
             Un(a) => un(a.eval()),
             Nu(a) => nu(a.eval()),
             Pa(a, b) => pa(a.eval(), b.eval()),
@@ -607,6 +616,11 @@ pub fn pa<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
 /// `a : b` - Type judgement.
 pub fn ty<T: Into<Expr>, U: Into<Expr>>(a: T, b: U) -> Expr {
     Ty(Box::new(a.into()), Box::new(b.into()))
+}
+
+/// `type(a)` - Type evaluation.
+pub fn typ<T: Into<Expr>>(a: T) -> Expr {
+    Type(Box::new(a.into()))
 }
 
 /// `p ~ i` - Path index.
@@ -801,6 +815,8 @@ mod tests {
         assert_eq!(un(_0).ty(), Some(un(I)));
 
         assert_eq!(tup2(_0, _1).ty(), Some(tup2(I, I)));
+
+        assert_eq!(typ(ind(pa(_0, _1), _1)).ty(), Some(I));
     }
 
     #[test]

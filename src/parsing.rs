@@ -138,6 +138,9 @@ pub fn parse_expr(
         } else if let Ok((range, v)) = parse_expr("lift", convert, ignored) {
             convert.update(range);
             res = Some(lift(v));
+        } else if let Ok((range, v)) = parse_expr("type", convert, ignored) {
+            convert.update(range);
+            res = Some(typ(v));
         } else if let Ok((range, v)) = parse_expr("not", convert, ignored) {
             convert.update(range);
             res = Some(not(v));
