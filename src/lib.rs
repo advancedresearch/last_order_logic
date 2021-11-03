@@ -476,9 +476,8 @@ impl Expr {
             Any(lam) => Any(Box::new(lam.eval())),
             All(lam) => All(Box::new(lam.eval())),
             App(a, b) => {
-                let a2 = a.eval();
                 let b2 = b.eval();
-                if let Some(res) = a2.app(&b2) {res} else {self.clone()}
+                if let Some(res) = a.app(&b2) {res} else {self.clone()}
             }
             Lift(a) => lift(a.eval()),
             Tup(tup) => Tup(tup.iter().map(|n| n.eval()).collect()),
@@ -1000,5 +999,13 @@ mod tests {
     fn test_any_asym() {
         let a = any(ty("i", I), ind(pa("a", "b"), "i"));
         assert_eq!(a.ty(), None);
+    }
+
+    #[test]
+    fn test_eval() {
+        let e = parsing::parse_str(r#"(\(p : ((I ~= I) ~= (I ~= I))) =
+        (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))((\(p : (I ~= I)) =
+        ∀ i : I { p ~ i } : un(1))(p)))((1 ~= 1) ~= (1 ~= 1))"#).unwrap();
+        assert_eq!(e.eval(), _1);
     }
 }
