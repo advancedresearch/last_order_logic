@@ -910,6 +910,9 @@ mod tests {
 
         let a = all(ty("i", I), ind(pa("a", "a"), "i"));
         assert_eq!(a.ty(), Some(un("a")));
+
+        let a = all(ty("p", pa(I, I)), lift(and("p", "p")));
+        assert_eq!(a.ty(), None);
     }
 
     #[test]
