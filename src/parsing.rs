@@ -158,6 +158,92 @@ pub fn parse_expr(
     Ok((convert.subtract(start), res))
 }
 
+/// Parses definition.
+pub fn parse_def(
+    node: &str,
+    mut convert: Convert,
+    ignored: &mut Vec<Range>,
+) -> Result<(Range, Arc<String>, Expr), ()> {
+    let start = convert;
+    let start_range = convert.start_node(node)?;
+    convert.update(start_range);
+
+    let mut name: Option<Arc<String>> = None;
+    let mut expr: Option<Expr> = None;
+    loop {
+        if let Ok(range) = convert.end_node(node) {
+            convert.update(range);
+            break;
+        } else if let Ok((range, v)) = convert.meta_string("name") {
+            convert.update(range);
+            name = Some(v);
+        } else if let Ok((range, v)) = parse_expr("expr", convert, ignored) {
+            convert.update(range);
+            expr = Some(v);
+        } else {
+            let range = convert.ignore();
+            convert.update(range);
+            ignored.push(range);
+        }
+    }
+
+    let name = name.ok_or(())?;
+    let expr = expr.ok_or(())?;
+    Ok((convert.subtract(start), name, expr))
+}
+
+/// Parses data.
+pub fn parse_data(
+    mut convert: Convert,
+    ignored: &mut Vec<Range>,
+) -> Result<(Range, Data), ()> {
+    let start = convert;
+
+    let mut res: Option<Data> = None;
+    if let Ok((range, v)) = parse_expr("expr", convert, ignored) {
+        convert.update(range);
+        res = Some(Data::Expr(v));
+    } else if let Ok((range, name, v)) = parse_def("def", convert, ignored) {
+        convert.update(range);
+        res = Some(Data::Def(name, v));
+    } else {
+        let range = convert.ignore();
+        convert.update(range);
+        ignored.push(range);
+    }
+
+    let res = res.ok_or(())?;
+    Ok((convert.subtract(start), res))
+}
+
+/// Reads data.
+pub enum Data {
+    /// New definition.
+    Def(Arc<String>, Expr),
+    /// Expression.
+    Expr(Expr),
+}
+
+/// Parses a data string.
+pub fn parse_data_str(data: &str) -> Result<Data, String> {
+    use piston_meta::{parse_errstr, syntax_errstr};
+
+    let syntax_src = include_str!("../assets/syntax.txt");
+    let syntax = syntax_errstr(syntax_src)?;
+
+    let mut meta_data = vec![];
+    parse_errstr(&syntax, &data, &mut meta_data)?;
+
+    // piston_meta::json::print(&meta_data);
+
+    let convert = Convert::new(&meta_data);
+    let mut ignored = vec![];
+    match parse_data(convert, &mut ignored) {
+        Err(()) => Err("Could not convert meta data".into()),
+        Ok((_, expr)) => Ok(expr),
+    }
+}
+
 /// Parses a string.
 pub fn parse_str(data: &str) -> Result<Expr, String> {
     use piston_meta::{parse_errstr, syntax_errstr};
