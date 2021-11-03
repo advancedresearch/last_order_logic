@@ -254,6 +254,11 @@ impl Expr {
                     None
                 }
             }
+            Pa(a, b) => {
+                let a_ty = a.ty()?;
+                let b_ty = b.ty()?;
+                Some(pa(a_ty, b_ty))
+            }
             All(lam) => {
                 if let Lam(arg, _) = &**lam {
                     if let Ty(_, ty) = &**arg {
@@ -671,6 +676,12 @@ mod tests {
 
         let b = ind(pa("a", "b"), _1).ty();
         assert_eq!(b, Some("b".into()));
+
+        let e = pa(_0, _0);
+        assert_eq!(e.ty(), Some(pa(I, I)));
+
+        let e = pa(pa(_0, _0), _0);
+        assert_eq!(e.ty(), Some(pa(pa(I, I), I)));
     }
 
     #[test]
