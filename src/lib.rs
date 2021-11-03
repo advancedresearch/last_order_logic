@@ -322,6 +322,11 @@ impl Expr {
                 let b_ty = b.ty()?;
                 Some(and(a_ty, b_ty).eval())
             }
+            Or(a, b) => {
+                let a_ty = a.ty()?;
+                let b_ty = b.ty()?;
+                Some(or(a_ty, b_ty).eval())
+            }
             _ => unimplemented!("{}", self),
         }
     }
@@ -504,6 +509,7 @@ impl Expr {
                 match (&**a, &**b) {
                     (_1, _) | (_, _1) => _1,
                     (_0, _0) => _0,
+                    (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
                         or((**a0).clone(), (**b0).clone()).eval(),
                         or((**a1).clone(), (**b1).clone()).eval(),
