@@ -464,6 +464,7 @@ impl Expr {
                 match &**a {
                     _0 => _1,
                     _1 => _0,
+                    I => I,
                     Un(a) => un(not((**a).clone()).eval()).eval(),
                     Nu(a) => nu(not((**a).clone()).eval()).eval(),
                     Pa(a, b) => pa(not((**a).clone()).eval(), not((**b).clone()).eval()),
@@ -725,6 +726,9 @@ mod tests {
 
         let a = not(T).eval();
         assert_eq!(a, F);
+
+        let a = not(I).eval();
+        assert_eq!(a, I);
     }
 
     #[test]
