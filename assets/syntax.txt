@@ -1,5 +1,6 @@
 _seps:"(){}~=:,&⋀|⋁!"
 
+16 ty_expr = ty:"ty"
 15 xor = {
   ["xor(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
   [lexpr:"left" .w? {"!=" "⊻"} .w? lexpr:"right"]
@@ -20,11 +21,11 @@ _seps:"(){}~=:,&⋀|⋁!"
   ["and(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
   [lexpr:"left" .w? {"&" "⋀"} .w? lexpr:"right"]
 }
-10 any = [{"∃" "any"} .w! expr:"left" .w! "{" .w? expr:"right" .w? "}"]
-9 all = [{"∀" "all"} .w! expr:"left" .w! "{" .w? expr:"right" .w? "}"]
+10 any = [{"∃" "any"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
+9 all = [{"∀" "all"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
 7 app = [lexpr:"left" "(" .w? expr:"right" .w? ")"]
-6 lam = ["\\(" expr:"left" ")" .w? "=" .w? expr:"right"]
+6 lam = ["\\(" ty_expr:"left" ")" .w? "=" .w? expr:"right"]
 5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
