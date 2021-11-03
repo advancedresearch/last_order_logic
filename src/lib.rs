@@ -263,6 +263,13 @@ impl Expr {
                 let b_ty = b.ty()?;
                 Some(pa(a_ty, b_ty))
             }
+            App(a, b) => {
+                if let Some(res) = a.app(b) {
+                    res.ty()
+                } else {
+                    None
+                }
+            }
             All(lam) => {
                 if let Lam(arg, _) = &**lam {
                     if let Ty(_, ty) = &**arg {
@@ -865,6 +872,11 @@ mod tests {
     fn test_app() {
         let e = app(lam(ty("a", I), "a"), _0);
         assert_eq!(e.eval(), _0);
+        assert_eq!(e.ty(), Some(I));
+
+        let e = app(lam(ty("a", pa(I, I)), ind("a", _0)), pa(_1, _0));
+        assert_eq!(e.eval(), ind(pa(_1, _0), _0));
+        assert_eq!(e.ty(), Some(_1));
     }
 
     #[test]
