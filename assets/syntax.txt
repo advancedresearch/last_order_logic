@@ -55,12 +55,12 @@ _seps:"(){}~=:,&⋀|⋁!¬"
   pa:"pa"
   ind:"ind"
   lam:"lam"
-  app:"app"
   and:"and"
   or:"or"
   imply:"imply"
   eq:"eq"
   xor:"xor"
+  app:"app"
   lexpr
 }
 0 doc = [.w? {def:"def" expr:"expr"} .w?]
