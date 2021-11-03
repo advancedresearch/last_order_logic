@@ -478,6 +478,11 @@ impl Expr {
             Ind(p, i) => ind(p.eval(), i.eval()),
             Any(lam) => Any(Box::new(lam.eval())),
             All(lam) => All(Box::new(lam.eval())),
+            App(a, b) => {
+                let a2 = a.eval();
+                let b2 = b.eval();
+                if let Some(res) = a2.app(&b2) {res} else {self.clone()}
+            }
             Lift(a) => lift(a.eval()),
             Tup(tup) => Tup(tup.iter().map(|n| n.eval()).collect()),
             Ty(a, b) => {
@@ -592,7 +597,6 @@ impl Expr {
                     }
                 }
             }
-            _ => unimplemented!("{}", self),
         }
     }
 }
@@ -855,6 +859,12 @@ mod tests {
 
         let a = all(ty("i", I), ind(or(pa(T, F), pa(F, T)), "i"));
         assert_eq!(a.ty(), Some(un(T)));
+    }
+
+    #[test]
+    fn test_app() {
+        let e = app(lam(ty("a", I), "a"), _0);
+        assert_eq!(e.eval(), _0);
     }
 
     #[test]
