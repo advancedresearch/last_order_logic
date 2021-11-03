@@ -370,11 +370,12 @@ impl Expr {
                     (pa(a2, b2), n + m)
                 }
                 Lam(arg2, body) => {
-                    if let Ty(a, _) = &**arg2 {
-                        if **a == *arg {(self.clone(), 0)}
+                    if let Ty(a, a_ty) = &**arg2 {
+                        let (a_ty2, m) = a_ty.substitute(arg, v);
+                        if **a == *arg {(lam(ty((**a).clone(), a_ty2), (**body).clone()), m)}
                         else {
                             let (body2, n) = body.substitute(arg, v);
-                            (lam((**arg2).clone(), body2), n)
+                            (lam(ty((**a).clone(), a_ty2), body2), m + n)
                         }
                     } else {
                         (self.clone(), 0)
