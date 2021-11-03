@@ -239,8 +239,7 @@ impl Expr {
     pub fn ty(&self) -> Option<Expr> {
         match self {
             _0 | _1 | Ty(_, _) => Some(I),
-            I => None,
-            Var(_) => None,
+            I | Var(_) | Lam(_, _) => None,
             Ind(p, i) => {
                 if let Pa(a, b) = &**p {
                     match &**i {
@@ -270,6 +269,21 @@ impl Expr {
                 } else {
                     None
                 }
+            }
+            Un(a) => {
+                let a_ty = a.ty()?;
+                Some(un(a_ty))
+            }
+            Nu(a) => {
+                let a_ty = a.ty()?;
+                Some(nu(a_ty))
+            }
+            Tup(vs) => {
+                let mut res = vec![];
+                for item in vs {
+                    res.push(item.ty()?);
+                }
+                Some(Tup(res))
             }
             All(lam) => {
                 if let Lam(arg, _) = &**lam {
@@ -354,7 +368,6 @@ impl Expr {
                 let b_ty = b.ty()?;
                 Some(xor(a_ty, b_ty).eval())
             }
-            _ => unimplemented!("{}", self),
         }
     }
 
@@ -824,6 +837,11 @@ mod tests {
         assert_eq!(e.ty(), Some(I));
 
         assert_eq!(I.ty(), None);
+
+        assert_eq!(nu(_0).ty(), Some(nu(I)));
+        assert_eq!(un(_0).ty(), Some(un(I)));
+
+        assert_eq!(tup2(_0, _1).ty(), Some(tup2(I, I)));
     }
 
     #[test]
