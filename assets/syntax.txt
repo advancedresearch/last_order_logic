@@ -1,35 +1,39 @@
 _seps:"(){}~=:,&⋀|⋁!"
 
+18 app_lexpr = {
+  app:"app"
+  lexpr
+}
 17 def = [.._seps!:"name" .w? ":=" .w? expr:"expr"]
 16 ty_expr = ty:"ty"
 15 xor = {
   ["xor(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [lexpr:"left" .w? {"!=" "⊻"} .w? lexpr:"right"]
+  [app_lexpr:"left" .w? {"!=" "⊻"} .w? app_lexpr:"right"]
 }
 14 eq = {
   ["eq(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [lexpr:"left" .w? "==" .w? lexpr:"right"]
+  [app_lexpr:"left" .w? "==" .w? app_lexpr:"right"]
 }
 13 imply = {
   ["imply(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [lexpr:"left" .w? "=>" .w? lexpr:"right"]
+  [app_lexpr:"left" .w? "=>" .w? app_lexpr:"right"]
 }
 12 or = {
   ["or(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [lexpr:"left" .w? {"|" "⋁"} .w? lexpr:"right"]
+  [app_lexpr:"left" .w? {"|" "⋁"} .w? app_lexpr:"right"]
 }
 11 and = {
   ["and(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [lexpr:"left" .w? {"&" "⋀"} .w? lexpr:"right"]
+  [app_lexpr:"left" .w? {"&" "⋀"} .w? app_lexpr:"right"]
 }
 10 any = [{"∃" "any"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 9 all = [{"∀" "all"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
 7 app = [lexpr:"left" "(" .w? expr:"right" .w? ")"]
 6 lam = ["\\(" ty_expr:"left" ")" .w? "=" .w? expr:"right"]
-5 ind = [lexpr:"left" .w? "~" .w? lexpr:"right"]
-4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
-3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
+5 ind = [app_lexpr:"left" .w? "~" .w? app_lexpr:"right"]
+4 pa = [app_lexpr:"left" .w? "~=" .w? app_lexpr:"right"]
+3 ty = [app_lexpr:"left" .w? ":" .w? app_lexpr:"right"]
 2 lexpr = {
   ["un(" .w? expr:"un" .w? ")"]
   ["nu(" .w? expr:"nu" .w? ")"]
