@@ -257,26 +257,10 @@ impl Expr {
                     None
                 }
             }
-            Pa(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(pa(a_ty, b_ty))
-            }
-            App(a, b) => {
-                if let Some(res) = a.app(b) {
-                    res.ty()
-                } else {
-                    None
-                }
-            }
-            Un(a) => {
-                let a_ty = a.ty()?;
-                Some(un(a_ty))
-            }
-            Nu(a) => {
-                let a_ty = a.ty()?;
-                Some(nu(a_ty))
-            }
+            Pa(a, b) => Some(pa(a.ty()?, b.ty()?)),
+            App(a, b) => a.app(b)?.ty(),
+            Un(a) => Some(un(a.ty()?)),
+            Nu(a) => Some(nu(a.ty()?)),
             Tup(vs) => {
                 let mut res = vec![];
                 for item in vs {
@@ -338,35 +322,12 @@ impl Expr {
                 }
             }
             Lift(a) => Some(a.eval()),
-            Not(a) => {
-                let a_ty = a.ty()?;
-                Some(not(a_ty).eval())
-            }
-            And(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(and(a_ty, b_ty).eval())
-            }
-            Or(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(or(a_ty, b_ty).eval())
-            }
-            Imply(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(imply(a_ty, b_ty).eval())
-            }
-            Eq(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(eq(a_ty, b_ty).eval())
-            }
-            Xor(a, b) => {
-                let a_ty = a.ty()?;
-                let b_ty = b.ty()?;
-                Some(xor(a_ty, b_ty).eval())
-            }
+            Not(a) => Some(not(a.ty()?).eval()),
+            And(a, b) => Some(and(a.ty()?, b.ty()?).eval()),
+            Or(a, b) => Some(or(a.ty()?, b.ty()?).eval()),
+            Imply(a, b) => Some(imply(a.ty()?, b.ty()?).eval()),
+            Eq(a, b) => Some(eq(a.ty()?, b.ty()?).eval()),
+            Xor(a, b) => Some(xor(a.ty()?, b.ty()?).eval()),
         }
     }
 
