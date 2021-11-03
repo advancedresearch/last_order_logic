@@ -29,7 +29,7 @@
 //! Last Order Logic fixes this problem by having quantified expressions evaluate to themselves,
 //! while the truth value is encoded in the type.
 //!
-//! `∀ x { ... } : un(1)` - It is easy to see this is `true`.
+//! `∀ x : I { ... } : un(1)` - It is easy to see this is `true`.
 //!
 //! Types are used to communicate intentions of programs.
 //! Last Order Logic uses this feature to increase readability.
