@@ -303,5 +303,6 @@ mod tests {
         assert_eq!(parse_str("1 ⊻ 0"), Ok(xor(_1, _0)));
         assert_eq!(parse_str("xor(1, 0)"), Ok(xor(_1, _0)));
         assert_eq!(parse_str("!f(0)"), Ok(not(app("f", _0))));
+        assert_eq!(parse_str("f(0) == 0"), Ok(eq(app("f", _0), _0)));
     }
 }
