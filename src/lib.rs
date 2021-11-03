@@ -480,7 +480,7 @@ impl Expr {
                 if let Some(a_ty) = a2.ty() {
                     if a_ty == b2 {T} else {F}
                 } else {
-                    F
+                    self.clone()
                 }
             }
             Not(a) => {
@@ -873,6 +873,9 @@ mod tests {
         let e = app(lam(ty("a", pa(I, I)), ind("a", _0)), pa(_1, _0));
         assert_eq!(e.eval(), ind(pa(_1, _0), _0));
         assert_eq!(e.ty(), Some(_1));
+
+        let e = app(lam(ty("p", pa(I, I)), ty(all(ty("i", I), ind("p", "i")), un(_1))), pa(_1, _1));
+        assert_eq!(e.eval(), _1);
     }
 
     #[test]
