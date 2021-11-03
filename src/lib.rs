@@ -151,7 +151,11 @@ impl fmt::Display for Expr {
                 }
             }
             App(a, b) => {
-                write!(w, "{}({})", a, b)?;
+                if a.needs_parens() {
+                    write!(w, "({})({})", a, b)?
+                } else {
+                    write!(w, "{}({})", a, b)?
+                };
             }
             Lift(a) => {
                 write!(w, "lift({})", a)?;
@@ -946,6 +950,9 @@ mod tests {
         let a = format!("{}", ty(all2(ty("i", I), ty("j", I),
             ind(pa(pa(T, T), pa(T, T)), tup2("i", "j"))), un(un(T))));
         assert_eq!(a, "∀ i : I { ∀ j : I { ((1 ~= 1) ~= (1 ~= 1)) ~ (i, j) } } : un(un(1))");
+
+        let a = format!("{}", app(lam(ty("a", I), "a"), _0));
+        assert_eq!(a, "(\\(a : I) = a)(0)");
     }
 
     #[test]
