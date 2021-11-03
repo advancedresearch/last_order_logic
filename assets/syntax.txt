@@ -30,6 +30,13 @@ _seps:"(){}~=:,&⋀|⋁!"
 4 pa = [lexpr:"left" .w? "~=" .w? lexpr:"right"]
 3 ty = [lexpr:"left" .w? ":" .w? lexpr:"right"]
 2 lexpr = {
+  ["un(" .w? expr:"un" .w? ")"]
+  ["nu(" .w? expr:"nu" .w? ")"]
+  ["lift(" .w? expr:"lift" .w? ")"]
+  ["not(" .w? expr:"not" .w? ")"]
+  [{"!" "¬"} lexpr:"not"]
+  all:"all"
+  any:"any"
   ["(" .w? expr .w? ")"]
   tup:"tup"
   "I":"I"
@@ -38,13 +45,6 @@ _seps:"(){}~=:,&⋀|⋁!"
   .._seps!:"var"
 }
 1 expr = {
-  ["un(" .w? expr:"un" .w? ")"]
-  ["nu(" .w? expr:"nu" .w? ")"]
-  ["lift(" .w? expr:"lift" .w? ")"]
-  ["not(" .w? expr:"not" .w? ")"]
-  [{"!" "¬"} expr:"not"]
-  all:"all"
-  any:"any"
   ty:"ty"
   pa:"pa"
   ind:"ind"
