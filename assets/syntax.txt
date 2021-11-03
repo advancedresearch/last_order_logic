@@ -1,4 +1,4 @@
-_seps:"(){}~=:,&⋀|⋁!"
+_seps:"(){}~=:,&⋀|⋁!¬"
 
 18 app_lexpr = {
   app:"app"
@@ -29,7 +29,7 @@ _seps:"(){}~=:,&⋀|⋁!"
 10 any = [{"∃" "any"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 9 all = [{"∀" "all"} .w! ty_expr:"left" .w! "{" .w? expr:"right" .w? "}"]
 8 tup = ["(" .w? .s!([.w? "," .w?] expr:"item") .w? ")"]
-7 app = [lexpr:"left" "(" .w? expr:"right" .w? ")"]
+7 app = [!{"!" "¬"} lexpr:"left" "(" .w? expr:"right" .w? ")"]
 6 lam = ["\\(" ty_expr:"left" ")" .w? "=" .w? expr:"right"]
 5 ind = [app_lexpr:"left" .w? "~" .w? app_lexpr:"right"]
 4 pa = [app_lexpr:"left" .w? "~=" .w? app_lexpr:"right"]
@@ -40,7 +40,7 @@ _seps:"(){}~=:,&⋀|⋁!"
   ["lift(" .w? expr:"lift" .w? ")"]
   ["type(" .w? expr:"type" .w? ")"]
   ["not(" .w? expr:"not" .w? ")"]
-  [{"!" "¬"} lexpr:"not"]
+  [{"!" "¬"} app_lexpr:"not"]
   all:"all"
   any:"any"
   ["(" .w? expr .w? ")"]
