@@ -7,9 +7,11 @@ https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-
 
 Special commands:
 
-- bye             quits the program
-- eval            evaluates last expression
-- ty              type checks last expression
-- red             show reduced form of expression
-- clear           remove all definitions
-- ``              prints separator for readability
+- bye               quits the program
+- eval              evaluates last expression
+- ty                type checks last expression
+- red               show reduced form of expression
+- clear             remove all definitions
+- import "<file>"   import file
+- reload            reload last imported file
+- ``                prints separator for readability
