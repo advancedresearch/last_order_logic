@@ -2,7 +2,7 @@ use last_order_logic::*;
 use std::sync::Arc;
 
 pub fn main() {
-    println!("=== Last Order Logic 0.1 ===");
+    println!("=== Last Order Logic 0.2 ===");
     println!("Type `help` for more information.");
 
     let mut defs: Vec<(Arc<String>, Expr)> = vec![];
