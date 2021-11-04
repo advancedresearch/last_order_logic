@@ -59,26 +59,7 @@ pub fn main() {
             "help" => {
                 println!("{}", include_str!("../assets/help.txt"));
             }
-            x => {
-                match parsing::parse_data_str(&x) {
-                    Ok(data) => {
-                        for d in data.into_iter() {
-                            match d {
-                                parsing::Data::Expr(expr) => {
-                                    println!("{}", expr);
-                                    last_expr = Some(expr);
-                                }
-                                parsing::Data::Def(name, expr) => {
-                                    println!("{} := {}", name, expr);
-                                    println!("LOL: Added `{}` to definitions", name);
-                                    defs.push((name, expr));
-                                }
-                            }
-                        }
-                    }
-                    Err(err) => println!("ERROR:\n{}", err),
-                }
-            }
+            x => runtime::data(x, &mut defs, &mut last_expr),
         }
     }
 }

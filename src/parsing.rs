@@ -206,6 +206,9 @@ pub fn parse_data(
     } else if let Ok((range, name, v)) = parse_def("def", convert, ignored) {
         convert.update(range);
         res = Some(Data::Def(name, v));
+    } else if let Ok((range, v)) = convert.meta_string("import") {
+        convert.update(range);
+        res = Some(Data::Import(v));
     } else {
         let range = convert.ignore();
         convert.update(range);
@@ -222,6 +225,8 @@ pub enum Data {
     Def(Arc<String>, Expr),
     /// Expression.
     Expr(Expr),
+    /// Import file.
+    Import(Arc<String>),
 }
 
 /// Parses a data string.
@@ -236,11 +241,24 @@ pub fn parse_data_str(data: &str) -> Result<Vec<Data>, String> {
 
     // piston_meta::json::print(&meta_data);
 
-    let convert = Convert::new(&meta_data);
+    let mut convert = Convert::new(&meta_data);
     let mut ignored = vec![];
-    match parse_data(convert, &mut ignored) {
-        Err(()) => Err("Could not convert meta data".into()),
-        Ok((_, expr)) => Ok(vec![expr]),
+    let mut res = vec![];
+
+    loop {
+        match parse_data(convert, &mut ignored) {
+            Err(()) => {
+                if ignored.len() > 0 && !(ignored.len() == 1 && ignored[0].length == 0) {
+                    return Err("Could not convert meta data".into())
+                } else {
+                    return Ok(res);
+                }
+            }
+            Ok((range, expr)) => {
+                convert.update(range);
+                res.push(expr);
+            }
+        }
     }
 }
 
