@@ -1,0 +1,21 @@
+=== LOL Boolean Algebra ===
+
+LOL has built-in functions for Boolean Algebra:
+
+- and     e.g. `a ⋀ b, a & b, and(a, b)`
+- or      e.g. `a ⋁ b, a | b, or(a, b)`
+- eq      e.g. `a == b, eq(a, b)`
+- xor     e.g. `a ⊻ b, a != b, a ¬= b, xor(a, b)`
+- imply   e.g. `a => b, imply(a, b)`
+- not     e.g. `¬a, !a, not(a)`
+
+For example:
+
+  1 & 1       evaluates to `1`
+  1 != 0      evaluates to `1`
+
+When a path is applied to a function, the output is also a path:
+
+  and(0 ~= 1, 1 ~= 1)     evaluates to `0 ~= 1`
+
+This is because `and(0, 1) ~= and(1, 1)` evaluates to `0 ~= 1`.
