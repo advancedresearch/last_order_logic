@@ -7,9 +7,11 @@ You can use `all` or `∀`.
 For example:
 
   all i : I { lift(i == i) }            has the type `un(1)`
+  all i : I { lift(i != i) }            has the type `nu(0)`
 
 Here, the type `I` is enumerated.
 `un(1)` means that the inner expression is true for all cases.
+`nu(0)` means that the inner expression is false for at least one case.
 
 Another example:
 
