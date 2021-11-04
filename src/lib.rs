@@ -30,6 +30,11 @@
 //! lolz
 //! ```
 //!
+//! ### How to learn LOL
+//!
+//! To learn how to use LOL, type "help" in LOLZ.
+//! This command lists all topics, e.g. "help path".
+//!
 //! ### Examples
 //!
 //! - [Geometry Synthesis](https://github.com/advancedresearch/last_order_logic/blob/main/source/geom.lol.md)
