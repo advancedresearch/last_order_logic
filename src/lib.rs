@@ -72,6 +72,19 @@
 //! The distinction between uniform and non-uniform sense of truth comes from the theory of
 //! [Avatar Extensions](https://advancedresearch.github.io/avatar-extensions/summary.html).
 //! Only non-uniform truth has a meaningful example that shows its truth value.
+//!
+//! ### File formats
+//!
+//! - Regular text format (`.lol.txt`)
+//! - Markdown text format (`.lol.md`)
+//!
+//! The Markdown format is designed for readability:
+//!
+//! - Must start with `#` (markdown title)
+//! - A codeblock must use 3 backticks and `lol`
+//!
+//! Special commands in the LOLZ environment are not supported.
+//! To refer to LOLZ usage, use 3 backticks and `text`.
 
 use std::sync::Arc;
 use Expr::*;
