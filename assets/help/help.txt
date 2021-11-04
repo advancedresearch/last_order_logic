@@ -20,3 +20,4 @@ Special commands:
 - help bool         more help about Boolean Algebra
 - help lift         more help about lift expressions
 - help path         more help about paths
+- help type         more help about type expressions
