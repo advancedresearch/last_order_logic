@@ -78,6 +78,9 @@ pub fn main() {
             "help bool" => {
                 println!("{}", include_str!("../assets/help/bool.txt"));
             }
+            "help lift" => {
+                println!("{}", include_str!("../assets/help/lift.txt"));
+            }
             "help" => {
                 println!("{}", include_str!("../assets/help/help.txt"));
             }
