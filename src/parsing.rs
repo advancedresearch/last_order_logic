@@ -225,7 +225,7 @@ pub enum Data {
 }
 
 /// Parses a data string.
-pub fn parse_data_str(data: &str) -> Result<Data, String> {
+pub fn parse_data_str(data: &str) -> Result<Vec<Data>, String> {
     use piston_meta::{parse_errstr, syntax_errstr};
 
     let syntax_src = include_str!("../assets/syntax.txt");
@@ -240,7 +240,7 @@ pub fn parse_data_str(data: &str) -> Result<Data, String> {
     let mut ignored = vec![];
     match parse_data(convert, &mut ignored) {
         Err(()) => Err("Could not convert meta data".into()),
-        Ok((_, expr)) => Ok(expr),
+        Ok((_, expr)) => Ok(vec![expr]),
     }
 }
 

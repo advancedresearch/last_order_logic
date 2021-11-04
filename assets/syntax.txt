@@ -63,4 +63,4 @@ _seps:"(){}~=:,&⋀|⋁!¬"
   xor:"xor"
   lexpr
 }
-0 doc = [.w? {def:"def" expr:"expr"} .w?]
+0 doc = [.w? .l({def:"def" expr:"expr"}) .w?]

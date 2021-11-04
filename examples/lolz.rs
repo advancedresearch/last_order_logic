@@ -61,14 +61,20 @@ pub fn main() {
             }
             x => {
                 match parsing::parse_data_str(&x) {
-                    Ok(parsing::Data::Expr(expr)) => {
-                        println!("{}", expr);
-                        last_expr = Some(expr);
-                    }
-                    Ok(parsing::Data::Def(name, expr)) => {
-                        println!("{} := {}", name, expr);
-                        println!("LOL: Added `{}` to definitions", name);
-                        defs.push((name, expr));
+                    Ok(data) => {
+                        for d in data.into_iter() {
+                            match d {
+                                parsing::Data::Expr(expr) => {
+                                    println!("{}", expr);
+                                    last_expr = Some(expr);
+                                }
+                                parsing::Data::Def(name, expr) => {
+                                    println!("{} := {}", name, expr);
+                                    println!("LOL: Added `{}` to definitions", name);
+                                    defs.push((name, expr));
+                                }
+                            }
+                        }
                     }
                     Err(err) => println!("ERROR:\n{}", err),
                 }
