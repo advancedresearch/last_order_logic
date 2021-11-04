@@ -1,5 +1,6 @@
 _seps:"(){}~=:,&⋀|⋁!¬"
 
+20 comment = ["//" ..."\n"?]
 19 import = ["import" .w! .t!:"import"]
 18 app_lexpr = {
   app:"app"
@@ -64,4 +65,4 @@ _seps:"(){}~=:,&⋀|⋁!¬"
   xor:"xor"
   lexpr
 }
-0 doc = [.w? .l({import def:"def" expr:"expr"}) .w?]
+0 doc = [.w? .l({comment import def:"def" expr:"expr"}) .w?]
