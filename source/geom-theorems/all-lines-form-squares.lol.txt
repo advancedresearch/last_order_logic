@@ -1,0 +1,11 @@
+/* Usage (LOLZ):
+```
+import "source/geom.lol.txt"
+import "source/geom-theorems/all-lines-form-squares.lol.txt"
+ty
+```
+*/
+all a : line_ty { lift(
+    line(a) =>
+    square(a ~= a)
+) }
