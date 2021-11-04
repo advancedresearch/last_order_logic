@@ -18,6 +18,7 @@ Special commands:
 - help all          more help about for-all expressions
 - help any          more help about there-exists expressions
 - help bool         more help about Boolean Algebra
+- help lambda       more help about lambda expressions
 - help lift         more help about lift expressions
 - help path         more help about paths
 - help type         more help about type expressions

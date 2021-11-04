@@ -1,0 +1,15 @@
+=== LOL Lambda ===
+
+A lambda expression is written in the form:
+
+  \(a : I) = ...
+
+Examples:
+
+  \(a : I) = a            identity function for propositions
+  \(a : (I ~= I)) = a     identity function for one-dimensional propositions
+
+This syntax is designed to be follow standard mathematical notation.
+Standard mathematical notation for functions uses `f(a : I) = a`.
+The `\` symbol is often associated with lambda expression in other languages.
+Here it is used to signal an anonymous function, which is a lambda expression.
