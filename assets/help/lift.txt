@@ -1,0 +1,17 @@
+=== LOL Lift ===
+
+LOL has a special function `lift` that has the type of its argument:
+
+  lift(0)       has type `0`
+
+The `lift` function is commonly used inside quantifiers:
+
+  all i : I { lift(i == i) }                  has type `un(1)`
+
+Without the `lift` function, one can prove the type instead:
+
+  all i : I { i == i }                        has type `un(I)`
+
+Notice that the path index operator `~` does not need `lift`:
+
+  all i : I { any p : (I ~= I) { p ~ i } }    has type `un(nu(1))`
