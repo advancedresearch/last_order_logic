@@ -4,6 +4,30 @@ An experimental logical language.
 
 Based on paper [Last Order Logic](https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-order-logic.pdf).
 
+```text
+=== Last Order Logic 0.2 ===
+Type `help` for more information.
+> a := 1 ~= 0
+a := 1 ~= 0
+LOL: Added `a` to definitions
+> a ~ 0
+a ~ 0
+> ty
+1
+```
+
+To run LOL from your Terminal, type:
+
+```text
+cargo install --example lolz last_order_logic
+```
+
+Then, to run:
+
+```text
+lolz
+```
+
 ### Examples
 
 - [Geometry Synthesis](https://github.com/advancedresearch/last_order_logic/blob/main/source/geom.lol.md)
