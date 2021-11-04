@@ -6,6 +6,10 @@
 //!
 //! Based on paper [Last Order Logic](https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-order-logic.pdf).
 //!
+//! ### Examples
+//!
+//! - [Geometry Synthesis](https://github.com/advancedresearch/last_order_logic/blob/main/source/geom.lol.md)
+//!
 //! ### Motivation
 //!
 //! In [First Order Logic](https://en.wikipedia.org/wiki/First-order_logic),
