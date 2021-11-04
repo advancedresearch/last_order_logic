@@ -8,7 +8,7 @@ _seps:"(){}~=:,&⋀|⋁!¬"
 16 ty_expr = ty:"ty"
 15 xor = {
   ["xor(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
-  [app_lexpr:"left" .w? {"!=" "⊻"} .w? app_lexpr:"right"]
+  [app_lexpr:"left" .w? {"!=" "¬=" "⊻"} .w? app_lexpr:"right"]
 }
 14 eq = {
   ["eq(" .w? expr:"left" .w? "," .w? expr:"right" .w? ")"]
