@@ -15,4 +15,5 @@ Special commands:
 - import "<file>"   import file
 - reload            reload last imported file
 - ``                prints separator for readability
+- help all          more help about for-all expressions
 - help path         more help about paths
