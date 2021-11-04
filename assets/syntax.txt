@@ -1,6 +1,9 @@
 _seps:"(){}~=:,&⋀|⋁!¬"
 
-20 comment = ["//" ..."\n"?]
+21 multi_line_comment = ["/*" ..."*/"? .r?({
+    [!"*/" "*" ..."*/"?] [multi_line_comment ..."*/"?] ["/" ..."*/"?]
+}) "*/"]
+20 comment = {multi_line_comment ["//" ..."\n"?]}
 19 import = ["import" .w! .t!:"import"]
 18 app_lexpr = {
   app:"app"
