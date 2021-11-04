@@ -11,4 +11,5 @@ Special commands:
 - eval            evaluates last expression
 - ty              type checks last expression
 - red             show reduced form of expression
+- clear           remove all definitions
 - ``              prints separator for readability

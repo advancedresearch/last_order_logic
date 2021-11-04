@@ -27,6 +27,7 @@ pub fn main() {
                 print!("\n------------------------------------<o=o");
                 println!("o=o>------------------------------------\n");
             }
+            "clear" => defs.clear(),
             "bye" => break,
             "red" => {
                 if let Some(expr) = &last_expr {
