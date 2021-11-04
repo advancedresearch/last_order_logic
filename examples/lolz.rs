@@ -66,8 +66,11 @@ pub fn main() {
                     println!("LOL: Previous import not set, use `import \"<file>\"`");
                 }
             }
+            "help path" => {
+                println!("{}", include_str!("../assets/help/path.txt"));
+            }
             "help" => {
-                println!("{}", include_str!("../assets/help.txt"));
+                println!("{}", include_str!("../assets/help/help.txt"));
             }
             x => runtime::data(x, &mut defs, &mut last_expr, &mut last_import),
         }

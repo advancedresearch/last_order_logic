@@ -1,4 +1,4 @@
-=== LOL Help ===
+=== LOLZ Help ===
 Made by Sven Nilsen, 2021
 
 Last Order Logic (LOL) is an experimental logical language
@@ -15,3 +15,4 @@ Special commands:
 - import "<file>"   import file
 - reload            reload last imported file
 - ``                prints separator for readability
+- help path         more help about paths
