@@ -401,7 +401,7 @@ impl Expr {
                 }
                 Lift(a) => {
                     let (a2, n) = a.substitute(arg, v);
-                    (lift(a2), n + 1)
+                    (lift(a2), n)
                 }
                 App(a, b) => {
                     let (a2, n) = a.substitute(arg, v);
@@ -454,9 +454,8 @@ impl Expr {
                             }
                         }
                     };
-                    let (body2, n) = body.substitute(a, v);
-                    if n == 0 {None}
-                    else {Some(body2.eval())}
+                    let (body2, _) = body.substitute(a, v);
+                    Some(body2.eval())
                 } else {
                     None
                 }
@@ -807,10 +806,10 @@ mod tests {
     #[test]
     fn test_fail() {
         let a = all(ty("i", I), T);
-        assert_eq!(a.ty(), None);
+        assert_eq!(a.ty(), Some(un(I)));
 
         let a = all2(ty("i", I), ty("j", I), ind(pa(T, T), "i"));
-        assert_eq!(a.ty(), None);
+        assert_eq!(a.ty(), Some(un(un(T))));
     }
 
     #[test]
