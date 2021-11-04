@@ -18,5 +18,5 @@ Another example:
   ∃ i : (I ~= I) { lift(i == i) }     has the type `nu(1 ~= 1)`
 
 Here, the type `I ~= I` is enumerated.
-`un(1 ~= 1)` means that the inner expression is true for at least one case,
+`nu(1 ~= 1)` means that the inner expression is true for at least one case,
 but in a one-dimensional sense, since `I ~= I` is a path.
