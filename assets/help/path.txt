@@ -1,0 +1,14 @@
+=== LOL Path ===
+
+A path in LOL is written in the form:
+
+  a ~= b
+
+To access the end-points of the path `a` and `b`:
+
+  (a ~= b) ~ 0          has type `a`
+  (a ~= b) ~ 1          has type `b`
+
+The reason type is used here instead of evaluation,
+is because `x : 0` means `x` is a way to construct `0`.
+With other words, `x` is a proof of `0`.
