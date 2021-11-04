@@ -68,4 +68,8 @@ _seps:"(){}~=:,&⋀|⋁!¬"
   xor:"xor"
   lexpr
 }
-0 doc = [.w? .l({comment import def:"def" expr:"expr"}) .w?]
+0 doc = {
+  ["#" .l([.l([!"```lol" ..."\n"?]) "```lol" .w?
+    .l([!"```" {comment import def:"def" expr:"expr"}]) .w? "```"])]
+  [.w? .l({comment import def:"def" expr:"expr"}) .w?]
+}
