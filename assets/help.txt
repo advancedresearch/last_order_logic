@@ -10,4 +10,5 @@ Special commands:
 - bye             quits the program
 - eval            evaluates last expression
 - ty              type checks last expression
+- red             show reduced form of expression
 - ``              prints separator for readability
