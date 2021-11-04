@@ -1,0 +1,20 @@
+=== LOL All ===
+
+A for-all quantifier in LOL enumerates the type of the parameter.
+
+You can use `all` or `∀`.
+
+For example:
+
+  all i : I { lift(i == i) }            has the type `un(1)`
+
+Here, the type `I` is enumerated.
+`un(1)` means that the inner expression is true for all cases.
+
+Another example:
+
+  ∀ i : (I ~= I) { lift(i == i) }     has the type `un(1 ~= 1)`
+
+Here, the type `I ~= I` is enumerated.
+`un(1 ~= 1)` means that the inner expression is true for all cases,
+but in a one-dimensional sense, since `I ~= I` is a path.
