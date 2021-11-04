@@ -1,0 +1,14 @@
+=== LOL Type ===
+
+LOL has a special function `type` that evaluates to the type of the argument:
+
+  type(0)       evaluates to `I`
+
+The `type` function is commonly used inside definitions:
+
+  swap := \(p : (I ~= I)) = type((p ~ 1) ~= (p ~ 0))
+
+  swap(1 ~= 0) == (0 ~= 1)
+
+This is because the path index operator `~` evaluates to itself,
+but puts the result in the type.

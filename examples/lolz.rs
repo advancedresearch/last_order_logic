@@ -81,6 +81,9 @@ pub fn main() {
             "help lift" => {
                 println!("{}", include_str!("../assets/help/lift.txt"));
             }
+            "help type" => {
+                println!("{}", include_str!("../assets/help/type.txt"));
+            }
             "help" => {
                 println!("{}", include_str!("../assets/help/help.txt"));
             }
