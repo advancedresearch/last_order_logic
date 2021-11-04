@@ -72,6 +72,9 @@ pub fn main() {
             "help all" => {
                 println!("{}", include_str!("../assets/help/all.txt"));
             }
+            "help any" => {
+                println!("{}", include_str!("../assets/help/any.txt"));
+            }
             "help" => {
                 println!("{}", include_str!("../assets/help/help.txt"));
             }

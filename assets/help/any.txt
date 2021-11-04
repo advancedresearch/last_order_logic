@@ -1,0 +1,22 @@
+=== LOL Any ===
+
+A there-exists quantifier in LOL enumerates the type of the parameter.
+
+You can use `any` or `∃`.
+
+For example:
+
+  any i : I { lift(i == i) }            has the type `nu(1)`
+  any i : I { lift(i != i) }            has the type `un(0)`
+
+Here, the type `I` is enumerated.
+`nu(1)` means that the inner expression is true for at least one case.
+`un(0)` means that the inner expression is false for all cases.
+
+Another example:
+
+  ∃ i : (I ~= I) { lift(i == i) }     has the type `nu(1 ~= 1)`
+
+Here, the type `I ~= I` is enumerated.
+`un(1 ~= 1)` means that the inner expression is true for at least one case,
+but in a one-dimensional sense, since `I ~= I` is a path.
