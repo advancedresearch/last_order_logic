@@ -7,6 +7,7 @@ pub fn main() {
 
     let mut defs: Vec<(Arc<String>, Expr)> = vec![];
     let mut last_expr: Option<Expr> = None;
+    let mut last_import: Option<String> = None;
     loop {
         use std::io::{self, Write};
 
@@ -57,10 +58,18 @@ pub fn main() {
                     println!("LOL: Type in an expression first");
                 }
             }
+            "reload" => {
+                if let Some(x) = &last_import {
+                    let x = x.clone();
+                    runtime::data(&x, &mut defs, &mut last_expr, &mut last_import);
+                } else {
+                    println!("LOL: Previous import not set, use `import \"<file>\"`");
+                }
+            }
             "help" => {
                 println!("{}", include_str!("../assets/help.txt"));
             }
-            x => runtime::data(x, &mut defs, &mut last_expr),
+            x => runtime::data(x, &mut defs, &mut last_expr, &mut last_import),
         }
     }
 }
