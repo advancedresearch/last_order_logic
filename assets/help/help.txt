@@ -16,4 +16,6 @@ Special commands:
 - reload            reload last imported file
 - ``                prints separator for readability
 - help all          more help about for-all expressions
+- help any          more help about there-exists expressions
+- help bool         more help about Boolean Algebra
 - help path         more help about paths
