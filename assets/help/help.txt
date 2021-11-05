@@ -17,6 +17,7 @@ Special commands:
 - ``                prints separator for readability
 - help all          more help about for-all expressions
 - help any          more help about there-exists expressions
+- help app          more help about application
 - help bool         more help about Boolean Algebra
 - help lambda       more help about lambda expressions
 - help lift         more help about lift expressions

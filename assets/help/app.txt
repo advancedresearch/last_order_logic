@@ -1,0 +1,19 @@
+=== LOL Application ===
+
+LOL applies a function to each end-point of a path:
+
+  not(a ~= b)                 evaluates to `not(a) ~= not(b)`
+
+When declaring a function, the argument type is used to decide
+whether to split up the path or not:
+
+  f1 := \(a : I) = ...
+  f1(b ~= c)                   evaluates to `f1(b) ~= f1(c)`
+
+  f2 := \(a : (I ~= I) = ...
+  f2(b ~= c)                   evaluates to `f2(b ~= c)`
+
+Since `f2` takes a path type `I ~= I`, the path is not split.
+However, one can apply `f2` to higher dimensional paths.
+
+  f2((b ~= c) ~= (d ~= e))    evaluates to `f2(b ~= c) ~= f2(d ~= e)`
