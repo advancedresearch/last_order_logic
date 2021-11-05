@@ -1,11 +1,11 @@
 [package]
 name = "last_order_logic"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 authors = [
   "bvssvni <bvssvni@gmail.com>"
 ]
-keywords = ["logic", "theorem", "proving", "advancedresearch"]
+keywords = ["lol", "logic", "theorem", "proving", "advancedresearch"]
 description = "An experimental logical language"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
