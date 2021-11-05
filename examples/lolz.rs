@@ -87,6 +87,9 @@ pub fn main() {
             "help lambda" => {
                 println!("{}", include_str!("../assets/help/lambda.txt"));
             }
+            "help app" => {
+                println!("{}", include_str!("../assets/help/app.txt"));
+            }
             "help" => {
                 println!("{}", include_str!("../assets/help/help.txt"));
             }
