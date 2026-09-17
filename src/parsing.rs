@@ -32,6 +32,68 @@ pub fn parse_tup(
     Ok((convert.subtract(start), Tup(res)))
 }
 
+/// Parses application.
+pub fn parse_app(
+    node: &str,
+    mut convert: Convert,
+    ignored: &mut Vec<Range>,
+) -> Result<(Range, Expr), ()> {
+    let start = convert;
+    let start_range = convert.start_node(node)?;
+    convert.update(start_range);
+
+    let mut f: Option<Expr> = None;
+    let mut args: Vec<Expr> = vec![];
+    loop {
+        if let Ok(range) = convert.end_node(node) {
+            convert.update(range);
+            break;
+        } else if let Ok((range, v)) = parse_expr("left", convert, ignored) {
+            convert.update(range);
+            f = Some(v);
+        } else if let Ok((range, v)) = parse_expr("right", convert, ignored) {
+            convert.update(range);
+            args.push(v);
+        } else {
+            let range = convert.ignore();
+            convert.update(range);
+            ignored.push(range);
+        }
+    }
+
+    let f = f.ok_or(())?;
+    let mut args = args.into_iter();
+    let mut app = App(Box::new(f), Box::new(args.next().unwrap()));
+    for arg in args {
+        app = App(Box::new(app), Box::new(arg));
+    }
+    Ok((convert.subtract(start), to_bin(app)))
+}
+
+fn to_bin(expr: Expr) -> Expr {
+    match expr {
+        App(ref a, ref b) => {
+            if let Var(name) = &**a {
+                if &**name == "not" {Not(b.clone())}
+                else {expr}
+            } else if let App(a1, a2) = &**a {
+                if let Var(name) = &**a1 {
+                    let f = match name.as_str() {
+                        "and" => And,
+                        "or" => Or,
+                        "xor" => Xor,
+                        "imply" => Imply,
+                        "eq" => Eq,
+                        _ => return expr,
+                    };
+                    f(a2.clone(), b.clone())
+                } else {expr}
+            } else {expr}
+        }
+        _ => expr,
+    }
+}
+
 /// Parses a left/right expression.
 pub fn parse_left_right(
     node: &str,
@@ -105,9 +167,9 @@ pub fn parse_expr(
         } else if let Ok((range, left, right)) = parse_left_right("lam", convert, ignored) {
             convert.update(range);
             res = Some(lam(left, right));
-        } else if let Ok((range, left, right)) = parse_left_right("app", convert, ignored) {
+        } else if let Ok((range, app)) = parse_app("app", convert, ignored) {
             convert.update(range);
-            res = Some(app(left, right));
+            res = Some(app);
         } else if let Ok((range, left, right)) = parse_left_right("all", convert, ignored) {
             convert.update(range);
             res = Some(all(left, right));
@@ -310,6 +372,8 @@ mod tests {
         assert_eq!(parse_str("0 & 1"), Ok(and(_0, _1)));
         assert_eq!(parse_str("0 ⋀ 1"), Ok(and(_0, _1)));
         assert_eq!(parse_str("and(0, 1)"), Ok(and(_0, _1)));
+        assert_eq!(parse_str("f(0, 1)"), Ok(app(app("f", _0), _1)));
+        assert_eq!(parse_str("f(0)(1)"), Ok(app(app("f", _0), _1)));
         assert_eq!(parse_str("0 | 1"), Ok(or(_0, _1)));
         assert_eq!(parse_str("0 ⋁ 1"), Ok(or(_0, _1)));
         assert_eq!(parse_str("or(0, 1)"), Ok(or(_0, _1)));
