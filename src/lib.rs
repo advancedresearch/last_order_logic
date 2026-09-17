@@ -285,11 +285,17 @@ impl Expr {
     }
 
     /// Gets the type of an expression.
-    pub fn ty(&self) -> Option<Expr> {
+    pub fn ty(&self, args: &mut Vec<(Arc<String>, Expr)>) -> Option<Expr> {
         match self {
             _0 | _1 | Ty(_, _) => Some(I),
-            I | Var(_) | Lam(_, _) => None,
-            Type(a) => a.eval().ty()?.ty(),
+            I | Lam(_, _) => None,
+            Var(n) => {
+                for arg in args.iter().rev() {
+                    if &arg.0 == n {return Some(arg.1.clone())}
+                }
+                None
+            }
+            Type(a) => a.eval(args).ty(args)?.ty(args),
             Ind(p, i) => {
                 if let Pa(a, b) = &**p {
                     match &**i {
@@ -298,8 +304,9 @@ impl Expr {
                         Tup(tup) => {
                             match tup.len() {
                                 0 => None,
-                                1 => ind((**p).clone(), tup[0].clone()).ty(),
-                                _ => ind(ind((**p).clone(), tup[0].clone()).ty()?, Tup(tup[1..].into())).ty(),
+                                1 => ind((**p).clone(), tup[0].clone()).ty(args),
+                                _ => ind(ind((**p).clone(), tup[0].clone()).ty(args)?,
+                                        Tup(tup[1..].into())).ty(args),
                             }
                         }
                         _ => None,
@@ -308,14 +315,14 @@ impl Expr {
                     None
                 }
             }
-            Pa(a, b) => Some(pa(a.ty()?, b.ty()?)),
-            App(a, b) => a.app(b)?.ty(),
-            Un(a) => Some(un(a.ty()?)),
-            Nu(a) => Some(nu(a.ty()?)),
+            Pa(a, b) => Some(pa(a.ty(args)?, b.ty(args)?)),
+            App(a, b) => a.app(b, args)?.ty(args),
+            Un(a) => Some(un(a.ty(args)?)),
+            Nu(a) => Some(nu(a.ty(args)?)),
             Tup(vs) => {
                 let mut res = vec![];
                 for item in vs {
-                    res.push(item.ty()?);
+                    res.push(item.ty(args)?);
                 }
                 Some(Tup(res))
             }
@@ -325,8 +332,8 @@ impl Expr {
                         let members = ty.members();
                         let mut res_ty = None;
                         for mem in &members {
-                            let val = lam.app(mem)?;
-                            let res = val.ty()?;
+                            let val = lam.app(mem, args)?;
+                            let res = val.ty(args)?;
                             if res_ty.is_none() {
                                 res_ty = Some(res);
                             } else if let Some(r) = &res_ty {
@@ -352,7 +359,7 @@ impl Expr {
                         let members = ty.members();
                         let mut res_ty = None;
                         for mem in &members {
-                            let res = lam.app(mem)?.ty()?;
+                            let res = lam.app(mem, args)?.ty(args)?;
                             if res_ty.is_none() {
                                 res_ty = Some(res);
                             } else if let Some(r) = &res_ty {
@@ -372,13 +379,13 @@ impl Expr {
                     None
                 }
             }
-            Lift(a) => Some(a.eval()),
-            Not(a) => Some(not(a.ty()?).eval()),
-            And(a, b) => Some(and(a.ty()?, b.ty()?).eval()),
-            Or(a, b) => Some(or(a.ty()?, b.ty()?).eval()),
-            Imply(a, b) => Some(imply(a.ty()?, b.ty()?).eval()),
-            Eq(a, b) => Some(eq(a.ty()?, b.ty()?).eval()),
-            Xor(a, b) => Some(xor(a.ty()?, b.ty()?).eval()),
+            Lift(a) => Some(a.eval(args)),
+            Not(a) => Some(not(a.ty(args)?).eval(args)),
+            And(a, b) => Some(and(a.ty(args)?, b.ty(args)?).eval(args)),
+            Or(a, b) => Some(or(a.ty(args)?, b.ty(args)?).eval(args)),
+            Imply(a, b) => Some(imply(a.ty(args)?, b.ty(args)?).eval(args)),
+            Eq(a, b) => Some(eq(a.ty(args)?, b.ty(args)?).eval(args)),
+            Xor(a, b) => Some(xor(a.ty(args)?, b.ty(args)?).eval(args)),
         }
     }
 
@@ -488,20 +495,23 @@ impl Expr {
     }
 
     /// Apply value to some lambda expression.
-    pub fn app(&self, v: &Expr) -> Option<Expr> {
+    pub fn app(&self, v: &Expr, args: &mut Vec<(Arc<String>, Expr)>) -> Option<Expr> {
         match self {
             Lam(arg, body) => {
                 if let Ty(a, arg_ty) = &**arg {
-                    if let Pa(v0, v1) = v {
-                        if let Some(v_ty) = v.ty() {
-                            if &v_ty != &**arg_ty {
-                                return Some(pa(app(self.clone(), (**v0).clone()),
-                                               app(self.clone(), (**v1).clone())).eval());
-                            }
-                        }
+                    let v_ty = v.ty(args);
+                    let same_ty = v_ty.as_ref().map(|v_ty| v_ty == &**arg_ty);
+                    if let (Some(false), Some(Pa(_, _))) = (same_ty, &v_ty) {
+                        return Some(pa(app(self.clone(), typ(ind(v.clone(), _0))),
+                                       app(self.clone(), typ(ind(v.clone(), _1)))).eval(args));
                     };
+                    if let Pa(_, _) = &**arg_ty {
+                        if v_ty.is_none() {return None};
+                    } else if let Some(false) = same_ty {
+                        return None;
+                    }
                     let (body2, _) = body.substitute(a, v);
-                    Some(body2.eval())
+                    Some(body2.eval(args))
                 } else {
                     None
                 }
@@ -511,27 +521,38 @@ impl Expr {
     }
 
     /// Evaluates an expression.
-    pub fn eval(&self) -> Expr {
+    pub fn eval(&self, args: &mut Vec<(Arc<String>, Expr)>) -> Expr {
         match self {
             _0 | _1 | I | Var(_) => self.clone(),
-            Type(a) => if let Some(ty) = a.ty() {ty} else {self.clone()},
-            Un(a) => un(a.eval()),
-            Nu(a) => nu(a.eval()),
-            Pa(a, b) => pa(a.eval(), b.eval()),
-            Lam(arg, v) => lam((**arg).clone(), v.eval()),
-            Ind(p, i) => ind(p.eval(), i.eval()),
-            Any(lam) => Any(Box::new(lam.eval())),
-            All(lam) => All(Box::new(lam.eval())),
-            App(a, b) => {
-                let b2 = b.eval();
-                if let Some(res) = a.app(&b2) {res} else {self.clone()}
+            Type(a) => if let Some(ty) = a.ty(args) {ty} else {self.clone()},
+            Un(a) => un(a.eval(args)),
+            Nu(a) => nu(a.eval(args)),
+            Pa(a, b) => pa(a.eval(args), b.eval(args)),
+            Lam(arg, v) => {
+                if let Ty(a, b) = &**arg {
+                    if let Var(a) = &**a {
+                        let n = args.len();
+                        args.push((a.clone(), (**b).clone()));
+                        let res = lam((**arg).clone(), v.eval(args));
+                        args.truncate(n);
+                        return res;
+                    }
+                }
+                lam((**arg).clone(), v.eval(args))
             }
-            Lift(a) => lift(a.eval()),
-            Tup(tup) => Tup(tup.iter().map(|n| n.eval()).collect()),
+            Ind(p, i) => ind(p.eval(args), i.eval(args)),
+            Any(lam) => Any(Box::new(lam.eval(args))),
+            All(lam) => All(Box::new(lam.eval(args))),
+            App(a, b) => {
+                let b2 = b.eval(args);
+                if let Some(res) = a.eval(args).app(&b2, args) {res} else {self.clone()}
+            }
+            Lift(a) => lift(a.eval(args)),
+            Tup(tup) => Tup(tup.iter().map(|n| n.eval(args)).collect()),
             Ty(a, b) => {
-                let a2 = a.eval();
-                let b2 = b.eval();
-                if let Some(a_ty) = a2.ty() {
+                let a2 = a.eval(args);
+                let b2 = b.eval(args);
+                if let Some(a_ty) = a2.ty(args) {
                     if a_ty == b2 {T} else {F}
                 } else {
                     self.clone()
@@ -542,13 +563,13 @@ impl Expr {
                     _0 => _1,
                     _1 => _0,
                     I => I,
-                    Un(a) => un(not((**a).clone()).eval()).eval(),
-                    Nu(a) => nu(not((**a).clone()).eval()).eval(),
-                    Pa(a, b) => pa(not((**a).clone()).eval(), not((**b).clone()).eval()),
+                    Un(a) => un(not((**a).clone()).eval(args)).eval(args),
+                    Nu(a) => nu(not((**a).clone()).eval(args)).eval(args),
+                    Pa(a, b) => pa(not((**a).clone()).eval(args), not((**b).clone()).eval(args)),
                     a => {
-                        let a2 = a.eval();
+                        let a2 = a.eval(args);
                         if &a2 != a {
-                            not(a.eval()).eval()
+                            not(a.eval(args)).eval(args)
                         } else {
                             self.clone()
                         }
@@ -561,14 +582,14 @@ impl Expr {
                     (_0, _) | (_, _0) => _0,
                     (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
-                        and((**a0).clone(), (**b0).clone()).eval(),
-                        and((**a1).clone(), (**b1).clone()).eval(),
+                        and((**a0).clone(), (**b0).clone()).eval(args),
+                        and((**a1).clone(), (**b1).clone()).eval(args),
                     ),
                     (a, b) => {
-                        let a2 = a.eval();
-                        let b2 = b.eval();
+                        let a2 = a.eval(args);
+                        let b2 = b.eval(args);
                         if &a2 == a && &b2 == b {self.clone()}
-                        else {and(a2, b2).eval()}
+                        else {and(a2, b2).eval(args)}
                     }
                 }
             }
@@ -578,14 +599,14 @@ impl Expr {
                     (_0, _0) => _0,
                     (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
-                        or((**a0).clone(), (**b0).clone()).eval(),
-                        or((**a1).clone(), (**b1).clone()).eval(),
+                        or((**a0).clone(), (**b0).clone()).eval(args),
+                        or((**a1).clone(), (**b1).clone()).eval(args),
                     ),
                     (a, b) => {
-                        let a2 = a.eval();
-                        let b2 = b.eval();
+                        let a2 = a.eval(args);
+                        let b2 = b.eval(args);
                         if &a2 == a && &b2 == b {self.clone()}
-                        else {or(a2, b2).eval()}
+                        else {or(a2, b2).eval(args)}
                     }
                 }
             }
@@ -595,14 +616,14 @@ impl Expr {
                     (_1, _0) => _0,
                     (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
-                        imply((**a0).clone(), (**b0).clone()).eval(),
-                        imply((**a1).clone(), (**b1).clone()).eval(),
+                        imply((**a0).clone(), (**b0).clone()).eval(args),
+                        imply((**a1).clone(), (**b1).clone()).eval(args),
                     ),
                     (a, b) => {
-                        let a2 = a.eval();
-                        let b2 = b.eval();
+                        let a2 = a.eval(args);
+                        let b2 = b.eval(args);
                         if &a2 == a && &b2 == b {self.clone()}
-                        else {imply(a2, b2).eval()}
+                        else {imply(a2, b2).eval(args)}
                     }
                 }
             }
@@ -612,14 +633,14 @@ impl Expr {
                     (_1, _0) | (_0, _1) => _0,
                     (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
-                        eq((**a0).clone(), (**b0).clone()).eval(),
-                        eq((**a1).clone(), (**b1).clone()).eval(),
+                        eq((**a0).clone(), (**b0).clone()).eval(args),
+                        eq((**a1).clone(), (**b1).clone()).eval(args),
                     ),
                     (a, b) => {
-                        let a2 = a.eval();
-                        let b2 = b.eval();
+                        let a2 = a.eval(args);
+                        let b2 = b.eval(args);
                         if &a2 == a && &b2 == b {self.clone()}
-                        else {eq(a2, b2).eval()}
+                        else {eq(a2, b2).eval(args)}
                     }
                 }
             }
@@ -629,14 +650,14 @@ impl Expr {
                     (_1, _0) | (_0, _1) => _1,
                     (I, I) => I,
                     (Pa(a0, a1), Pa(b0, b1)) => pa(
-                        xor((**a0).clone(), (**b0).clone()).eval(),
-                        xor((**a1).clone(), (**b1).clone()).eval(),
+                        xor((**a0).clone(), (**b0).clone()).eval(args),
+                        xor((**a1).clone(), (**b1).clone()).eval(args),
                     ),
                     (a, b) => {
-                        let a2 = a.eval();
-                        let b2 = b.eval();
+                        let a2 = a.eval(args);
+                        let b2 = b.eval(args);
                         if &a2 == a && &b2 == b {self.clone()}
-                        else {xor(a2, b2).eval()}
+                        else {xor(a2, b2).eval(args)}
                     }
                 }
             }
@@ -758,62 +779,62 @@ mod tests {
 
     #[test]
     fn ty_path() {
-        let a = ind(pa("a", "b"), _0).ty();
+        let a = ind(pa("a", "b"), _0).ty(&mut vec![]);
         assert_eq!(a, Some("a".into()));
 
-        let b = ind(pa("a", "b"), _1).ty();
+        let b = ind(pa("a", "b"), _1).ty(&mut vec![]);
         assert_eq!(b, Some("b".into()));
 
         let e = pa(_0, _0);
-        assert_eq!(e.ty(), Some(pa(I, I)));
+        assert_eq!(e.ty(&mut vec![]), Some(pa(I, I)));
 
         let e = pa(pa(_0, _0), _0);
-        assert_eq!(e.ty(), Some(pa(pa(I, I), I)));
+        assert_eq!(e.ty(&mut vec![]), Some(pa(pa(I, I), I)));
     }
 
     #[test]
     fn ty_f() {
         let f = lam(ty("i", I), ind(pa(T, F), "i"));
-        assert_eq!(f.app(&_0).unwrap().ty().unwrap(), T);
-        assert_eq!(f.app(&_1).unwrap().ty().unwrap(), F);
+        assert_eq!(f.app(&_0, &mut vec![]).unwrap().ty(&mut vec![]).unwrap(), T);
+        assert_eq!(f.app(&_1, &mut vec![]).unwrap().ty(&mut vec![]).unwrap(), F);
 
         let all1 = all(ty("i", I), ind(pa(T, F), "i"));
-        assert_eq!(all1.ty(), Some(nu(F)));
+        assert_eq!(all1.ty(&mut vec![]), Some(nu(F)));
         let any1 = any(ty("i", I), ind(pa(T, F), "i"));
-        assert_eq!(any1.ty(), Some(nu(T)));
+        assert_eq!(any1.ty(&mut vec![]), Some(nu(T)));
 
         let all2 = all(ty("i", I), ind(pa(T, T), "i"));
-        assert_eq!(all2.ty(), Some(un(T)));
+        assert_eq!(all2.ty(&mut vec![]), Some(un(T)));
         let any2 = any(ty("i", I), ind(pa(T, T), "i"));
-        assert_eq!(any2.ty(), Some(nu(T)));
+        assert_eq!(any2.ty(&mut vec![]), Some(nu(T)));
 
         let all3 = all(ty("i", I), ind(pa(F, F), "i"));
-        assert_eq!(all3.ty(), Some(nu(F)));
+        assert_eq!(all3.ty(&mut vec![]), Some(nu(F)));
         let any3 = any(ty("i", I), ind(pa(F, F), "i"));
-        assert_eq!(any3.ty(), Some(un(F)));
+        assert_eq!(any3.ty(&mut vec![]), Some(un(F)));
     }
 
     #[test]
     fn test_not() {
-        let a = not(pa(T, F)).eval();
+        let a = not(pa(T, F)).eval(&mut vec![]);
         assert_eq!(a, pa(F, T));
 
-        let b = not(pa(F, T)).eval();
+        let b = not(pa(F, T)).eval(&mut vec![]);
         assert_eq!(b, pa(T, F));
 
-        let c = not(pa(T, T)).eval();
+        let c = not(pa(T, T)).eval(&mut vec![]);
         assert_eq!(c, pa(F, F));
 
-        let d = not(pa(F, F)).eval();
+        let d = not(pa(F, F)).eval(&mut vec![]);
         assert_eq!(d, pa(T, T));
 
-        let f = not(pa(pa(T, F), pa(F, T))).eval();
+        let f = not(pa(pa(T, F), pa(F, T))).eval(&mut vec![]);
         assert_eq!(f, pa(pa(F, T), pa(T, F)));
 
-        let a = not(T).eval();
+        let a = not(T).eval(&mut vec![]);
         assert_eq!(a, F);
 
-        let a = not(I).eval();
+        let a = not(I).eval(&mut vec![]);
         assert_eq!(a, I);
     }
 
@@ -824,197 +845,197 @@ mod tests {
         let a01 = ind(a.clone(), tup2(_0, _1));
         let a10 = ind(a.clone(), tup2(_1, _0));
         let a11 = ind(a, tup2(_1, _1));
-        assert_eq!(a00.ty(), Some(F));
-        assert_eq!(a01.ty(), Some(T));
-        assert_eq!(a10.ty(), Some(F));
-        assert_eq!(a11.ty(), Some(F));
+        assert_eq!(a00.ty(&mut vec![]), Some(F));
+        assert_eq!(a01.ty(&mut vec![]), Some(T));
+        assert_eq!(a10.ty(&mut vec![]), Some(F));
+        assert_eq!(a11.ty(&mut vec![]), Some(F));
 
         let a = pa(pa(T, T), pa(T, T));
         let f = all2(ty("i", I), ty("j", I), ind(a, tup2("i", "j")));
-        assert_eq!(f.ty(), Some(un(un(T))));
+        assert_eq!(f.ty(&mut vec![]), Some(un(un(T))));
 
         let a = pa(pa(T, T), pa(T, F));
         let f = all2(ty("i", I), ty("j", I), ind(a.clone(), tup2("i", "j")));
-        assert_eq!(f.ty(), Some(nu(nu(F))));
+        assert_eq!(f.ty(&mut vec![]), Some(nu(nu(F))));
     }
 
     #[test]
     fn test_2d_2() {
         let a = pa(pa(T, T), pa(T, F));
         let f = all(ty("i", I), any(ty("j", I), ind(a, tup2("i", "j"))));
-        assert_eq!(f.ty(), Some(un(nu(T))));
+        assert_eq!(f.ty(&mut vec![]), Some(un(nu(T))));
 
         let a = pa(pa(T, T), pa(F, F));
         let f = all(ty("i", I), any(ty("j", I), ind(a, tup2("i", "j"))));
-        assert_eq!(f.ty(), Some(nu(un(F))));
+        assert_eq!(f.ty(&mut vec![]), Some(nu(un(F))));
     }
 
     #[test]
     fn test_fail() {
         let a = all(ty("i", I), T);
-        assert_eq!(a.ty(), Some(un(I)));
+        assert_eq!(a.ty(&mut vec![]), Some(un(I)));
 
         let a = all2(ty("i", I), ty("j", I), ind(pa(T, T), "i"));
-        assert_eq!(a.ty(), Some(un(un(T))));
+        assert_eq!(a.ty(&mut vec![]), Some(un(un(T))));
     }
 
     #[test]
     fn test_ty_ty() {
         let e = ty(_0, I);
-        assert_eq!(e.ty(), Some(I));
+        assert_eq!(e.ty(&mut vec![]), Some(I));
 
-        assert_eq!(I.ty(), None);
+        assert_eq!(I.ty(&mut vec![]), None);
 
-        assert_eq!(nu(_0).ty(), Some(nu(I)));
-        assert_eq!(un(_0).ty(), Some(un(I)));
+        assert_eq!(nu(_0).ty(&mut vec![]), Some(nu(I)));
+        assert_eq!(un(_0).ty(&mut vec![]), Some(un(I)));
 
-        assert_eq!(tup2(_0, _1).ty(), Some(tup2(I, I)));
+        assert_eq!(tup2(_0, _1).ty(&mut vec![]), Some(tup2(I, I)));
 
-        assert_eq!(typ(ind(pa(_0, _1), _1)).ty(), Some(I));
+        assert_eq!(typ(ind(pa(_0, _1), _1)).ty(&mut vec![]), Some(I));
     }
 
     #[test]
     fn test_all_bool_ty() {
         let e = all(ty("i", I), ty("i", I));
-        assert_eq!(e.ty(), Some(un(I)));
+        assert_eq!(e.ty(&mut vec![]), Some(un(I)));
     }
 
     #[test]
     fn test_and() {
         let e = and(T, T);
-        assert_eq!(e.eval(), T);
+        assert_eq!(e.eval(&mut vec![]), T);
 
         let e = and(T, F);
-        assert_eq!(e.eval(), F);
+        assert_eq!(e.eval(&mut vec![]), F);
 
         let e = and(F, F);
-        assert_eq!(e.eval(), F);
+        assert_eq!(e.eval(&mut vec![]), F);
 
         let e = and(pa(T, F), pa(T, T));
-        assert_eq!(e.eval(), pa(T, F));
+        assert_eq!(e.eval(&mut vec![]), pa(T, F));
 
         let a = all(ty("i", I), ind(and(pa(T, T), pa(T, T)), "i"));
-        assert_eq!(a.ty(), Some(un(T)));
+        assert_eq!(a.ty(&mut vec![]), Some(un(T)));
     }
 
     #[test]
     fn test_or() {
         let e = or(T, T);
-        assert_eq!(e.eval(), T);
+        assert_eq!(e.eval(&mut vec![]), T);
 
         let e = or(T, F);
-        assert_eq!(e.eval(), T);
+        assert_eq!(e.eval(&mut vec![]), T);
 
         let e = or(F, F);
-        assert_eq!(e.eval(), F);
+        assert_eq!(e.eval(&mut vec![]), F);
 
         let e = or(pa(T, F), pa(T, T));
-        assert_eq!(e.eval(), pa(T, T));
+        assert_eq!(e.eval(&mut vec![]), pa(T, T));
 
         let a = all(ty("i", I), ind(or(pa(T, T), pa(T, T)), "i"));
-        assert_eq!(a.ty(), Some(un(T)));
+        assert_eq!(a.ty(&mut vec![]), Some(un(T)));
 
         let a = all(ty("i", I), ind(or(pa(T, F), pa(F, T)), "i"));
-        assert_eq!(a.ty(), Some(un(T)));
+        assert_eq!(a.ty(&mut vec![]), Some(un(T)));
     }
 
     #[test]
     fn test_app() {
         let e = app(lam(ty("a", I), "a"), _0);
-        assert_eq!(e.eval(), _0);
-        assert_eq!(e.ty(), Some(I));
+        assert_eq!(e.eval(&mut vec![]), _0);
+        assert_eq!(e.ty(&mut vec![]), Some(I));
 
         let e = app(lam(ty("a", pa(I, I)), ind("a", _0)), pa(_1, _0));
-        assert_eq!(e.eval(), ind(pa(_1, _0), _0));
-        assert_eq!(e.ty(), Some(_1));
+        assert_eq!(e.eval(&mut vec![]), ind(pa(_1, _0), _0));
+        assert_eq!(e.ty(&mut vec![]), Some(_1));
 
         let e = app(lam(ty("p", pa(I, I)), ty(all(ty("i", I), ind("p", "i")), un(_1))), pa(_1, _1));
-        assert_eq!(e.eval(), _1);
+        assert_eq!(e.eval(&mut vec![]), _1);
     }
 
     #[test]
     fn test_eval_ty() {
         let e = ty(ind(pa(T, F), _0), T);
-        assert_eq!(e.eval(), T);
+        assert_eq!(e.eval(&mut vec![]), T);
 
         let e = ty(ind(pa(F, T), _0), T);
-        assert_eq!(e.eval(), F);
+        assert_eq!(e.eval(&mut vec![]), F);
 
         let e = ty(_0, I);
-        assert_eq!(e.eval(), T);
+        assert_eq!(e.eval(&mut vec![]), T);
 
         let e = all(ty("i", I), ind(pa(T, ty("i", I)), "i"));
-        assert_eq!(e.ty(), Some(un(T)));
+        assert_eq!(e.ty(&mut vec![]), Some(un(T)));
 
         let a = ty(all2(ty("i", I), ty("j", I),
             ind(pa(pa(T, T), pa(T, T)), tup2("i", "j"))), un(un(T)));
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
 
         let b = ty(ind(pa(T, F), _0), a);
-        assert_eq!(b.eval(), T);
+        assert_eq!(b.eval(&mut vec![]), T);
 
         let a = ty(T, I);
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
     }
 
     #[test]
     fn test_all_path() {
         let a = all(ty("p", pa(I, I)), ind("p", _0));
-        assert_eq!(a.ty(), Some(nu(F)));
+        assert_eq!(a.ty(&mut vec![]), Some(nu(F)));
 
         // ¬(∀ i { (0 ~= 0) ~ i } : un(1))
         let a1 = ty(all(ty("i", I), ind(pa(_0, _0), "i")), un(_1));
-        assert_eq!(a1.eval(), F);
+        assert_eq!(a1.eval(&mut vec![]), F);
 
         // ∃ i { (¬(0 ~= 0)) ~ i } : un(0)
         let a2 = ty(all(ty("i", I), ind(not(pa(_0, _0)), "i")), un(_0));
-        assert_eq!(a2.eval(), F);
+        assert_eq!(a2.eval(&mut vec![]), F);
 
         // lift((¬(∀ i { (0 ~= 0) ~ i } : un(1))) ⋁ (∃ i { (¬(0 ~= 0)) ~ i } : un(0)))
-        let a3 = lift(or(a1, a2.eval()));
-        assert_eq!(a3.eval(), lift(F));
+        let a3 = lift(or(a1, a2.eval(&mut vec![])));
+        assert_eq!(a3.eval(&mut vec![]), lift(F));
 
         let a = all(ty("p", pa(I, I)), lift(imply(
             ty(all(ty("i", I), ind("p", "i")), un(T)),
             ty(any(ty("i", I), ind(not("p"), "i")), un(F)))));
-        assert_eq!(a.ty(), Some(un(T)));
+        assert_eq!(a.ty(&mut vec![]), Some(un(T)));
 
         let a = not(un(T));
-        assert_eq!(a.eval(), un(F));
+        assert_eq!(a.eval(&mut vec![]), un(F));
 
         let a = ty(all(ty("p", pa(I, I)), lift(imply(
             ty(all(ty("i", I), ind("p", "i")), un(T)),
             ty(not(any(ty("i", I), ind(not("p"), "i"))), un(T))))), un(T));
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
     }
 
     #[test]
     fn test_eq() {
         let a = eq(T, T);
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
 
         let a = eq(pa(T, F), pa(T, F));
-        assert_eq!(a.eval(), pa(T, T));
+        assert_eq!(a.eval(&mut vec![]), pa(T, T));
     }
 
     #[test]
     fn test_xor() {
         let a = xor(T, F);
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
 
         let a = xor(pa(T, F), pa(F, T));
-        assert_eq!(a.eval(), pa(T, T));
+        assert_eq!(a.eval(&mut vec![]), pa(T, T));
 
         let a = all2(ty("a", I), ty("b", I), lift(eq(not(eq("a", "b")), xor("a", "b"))));
-        assert_eq!(a.ty(), Some(un(un(T))));
+        assert_eq!(a.ty(&mut vec![]), Some(un(un(T))));
         let a = ty(a, un(un(T)));
-        assert_eq!(a.eval(), T);
+        assert_eq!(a.eval(&mut vec![]), T);
     }
 
     #[test]
     fn test_uniform() {
         let a = all(ty("i", I), ind(pa("a", "a"), "i"));
-        assert_eq!(a.ty(), Some(un("a")));
+        assert_eq!(a.ty(&mut vec![]), Some(un("a")));
     }
 
     #[test]
@@ -1033,26 +1054,41 @@ mod tests {
     #[test]
     fn test_all_asym() {
         let a = all(ty("i", I), ind(pa("a", "b"), "i"));
-        assert_eq!(a.ty(), None);
+        assert_eq!(a.ty(&mut vec![]), None);
 
         let a = all(ty("i", I), ind(pa("a", "a"), "i"));
-        assert_eq!(a.ty(), Some(un("a")));
+        assert_eq!(a.ty(&mut vec![]), Some(un("a")));
 
         let a = all(ty("p", pa(I, I)), lift(and("p", "p")));
-        assert_eq!(a.ty(), None);
+        assert_eq!(a.ty(&mut vec![]), None);
     }
 
     #[test]
     fn test_any_asym() {
         let a = any(ty("i", I), ind(pa("a", "b"), "i"));
-        assert_eq!(a.ty(), None);
+        assert_eq!(a.ty(&mut vec![]), None);
     }
 
     #[test]
     fn test_eval() {
+        let e = parsing::parse_str(r#" (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))(p) "#).unwrap();
+        assert_eq!(e.eval(&mut vec![]), app(
+            lam(
+                ty("p", pa(I, I)),
+                ty(all(ty("i", I), ind("p", "i")), un(_1))
+            ),
+            "p"
+        ));
+
+        let e = parsing::parse_str(r#"\(p : ((I ~= I) ~= (I ~= I))) = (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))(p)"#).unwrap();
+        let e2 = e.eval(&mut vec![]);
+        let expected = parsing::parse_str(r#"\(p : ((I ~= I) ~= (I ~= I))) = (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))(type(p ~ 0)) ~= (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))(type(p ~ 1))"#).unwrap();
+        assert_eq!(e2, expected);
+
         let e = parsing::parse_str(r#"(\(p : ((I ~= I) ~= (I ~= I))) =
         (\(p : (I ~= I)) = ∀ i : I { p ~ i } : un(1))((\(p : (I ~= I)) =
         ∀ i : I { p ~ i } : un(1))(p)))((1 ~= 1) ~= (1 ~= 1))"#).unwrap();
-        assert_eq!(e.eval(), _1);
+        let e2 = e.eval(&mut vec![]);
+        assert_eq!(e2, _1);
     }
 }
