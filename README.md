@@ -5,7 +5,7 @@ An experimental logical language.
 Based on paper [Last Order Logic](https://github.com/advancedresearch/path_semantics/blob/master/papers-wip2/last-order-logic.pdf).
 
 ```text
-=== Last Order Logic 0.2 ===
+=== Last Order Logic 0.3 ===
 Type `help` for more information.
 > a := 1 ~= 0
 a := 1 ~= 0
