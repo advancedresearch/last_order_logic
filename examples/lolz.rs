@@ -41,7 +41,7 @@ pub fn main() {
             "eval" => {
                 if let Some(expr) = &last_expr {
                     let expr = runtime::reduce(expr, &defs);
-                    println!("{}", expr.eval());
+                    println!("{}", expr.eval(&mut vec![]));
                 } else {
                     println!("LOL: Type in an expression first");
                 }
@@ -49,7 +49,7 @@ pub fn main() {
             "ty" => {
                 if let Some(expr) = &last_expr {
                     let expr = runtime::reduce(expr, &defs);
-                    if let Some(ty) = expr.ty() {
+                    if let Some(ty) = expr.ty(&mut vec![]) {
                         println!("{}", ty);
                     } else {
                         println!("LOL: No type found for expression");
